@@ -1,4 +1,6 @@
-﻿namespace LautusInformatica.Models
+﻿using LautusInformatica.Models.Enums;
+
+namespace LautusInformatica.Models
 {
     public class ServiceOrder
     {
