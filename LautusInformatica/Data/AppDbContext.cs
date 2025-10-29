@@ -13,13 +13,11 @@ namespace LautusInformatica.Data
         {
         }
 
-        // 1️⃣ DbSets para todas as suas entidades
         public DbSet<Client> Clients { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<ServiceOrder> ServiceOrders { get; set; }
         public DbSet<UsedItems> UsedItems { get; set; }
 
-        // 2️⃣ Configurações adicionais
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
