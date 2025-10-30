@@ -13,7 +13,7 @@ namespace LautusInformatica.Data
         {
         }
 
-        public DbSet<Client> Clients { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<ServiceOrder> ServiceOrders { get; set; }
         public DbSet<UsedItems> UsedItems { get; set; }
@@ -22,15 +22,15 @@ namespace LautusInformatica.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Client>().ToTable("Clients").HasKey(c => c.Id);
+            modelBuilder.Entity<User>().ToTable("Users").HasKey(c => c.Id);
             modelBuilder.Entity<Item>().ToTable("Items").HasKey(i => i.Id);
             modelBuilder.Entity<ServiceOrder>().ToTable("ServiceOrders").HasKey(s => s.Id);
             modelBuilder.Entity<UsedItems>().ToTable("UsedItems").HasKey(u => u.Id);
 
             modelBuilder.Entity<ServiceOrder>()
-                .HasOne(s => s.Client)
+                .HasOne(s => s.User)
                 .WithMany(c => c.ServiceOrders)
-                .HasForeignKey(s => s.ClientId)
+                .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UsedItems>()
@@ -45,7 +45,7 @@ namespace LautusInformatica.Data
                 .HasForeignKey(u => u.ItemId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Client>().HasQueryFilter(c => c.IsDeleted == false);
+            modelBuilder.Entity<User>().HasQueryFilter(c => c.IsDeleted == false);
             modelBuilder.Entity<Item>().HasQueryFilter(i => i.IsDeleted == false);
             modelBuilder.Entity<ServiceOrder>().HasQueryFilter(s => s.IsDeleted == false);
             modelBuilder.Entity<UsedItems>().HasQueryFilter(u => u.IsDeleted == false);

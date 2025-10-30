@@ -1,4 +1,4 @@
-﻿namespace LautusInformatica.Models
+﻿namespace LautusInformatica.Models.Enums
 {
     public enum ItemCategory
     {

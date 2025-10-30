@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LautusInformatica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251029184449_InitialCreate")]
+    [Migration("20251030123057_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,44 +24,6 @@ namespace LautusInformatica.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("LautusInformatica.Models.Client", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Clients", (string)null);
-                });
 
             modelBuilder.Entity("LautusInformatica.Models.Item", b =>
                 {
@@ -81,7 +43,7 @@ namespace LautusInformatica.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
@@ -107,9 +69,6 @@ namespace LautusInformatica.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClientId")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly?>("CompletionDate")
                         .HasColumnType("date");
 
@@ -123,7 +82,7 @@ namespace LautusInformatica.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Problem")
@@ -133,9 +92,12 @@ namespace LautusInformatica.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("ServiceOrders", (string)null);
                 });
@@ -151,7 +113,7 @@ namespace LautusInformatica.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("ItemId")
@@ -172,15 +134,60 @@ namespace LautusInformatica.Migrations
                     b.ToTable("UsedItems", (string)null);
                 });
 
+            modelBuilder.Entity("LautusInformatica.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", (string)null);
+                });
+
             modelBuilder.Entity("LautusInformatica.Models.ServiceOrder", b =>
                 {
-                    b.HasOne("LautusInformatica.Models.Client", "Client")
+                    b.HasOne("LautusInformatica.Models.User", "User")
                         .WithMany("ServiceOrders")
-                        .HasForeignKey("ClientId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Client");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LautusInformatica.Models.UsedItems", b =>
@@ -202,11 +209,6 @@ namespace LautusInformatica.Migrations
                     b.Navigation("ServiceOrder");
                 });
 
-            modelBuilder.Entity("LautusInformatica.Models.Client", b =>
-                {
-                    b.Navigation("ServiceOrders");
-                });
-
             modelBuilder.Entity("LautusInformatica.Models.Item", b =>
                 {
                     b.Navigation("UsedItems");
@@ -215,6 +217,11 @@ namespace LautusInformatica.Migrations
             modelBuilder.Entity("LautusInformatica.Models.ServiceOrder", b =>
                 {
                     b.Navigation("UsedItems");
+                });
+
+            modelBuilder.Entity("LautusInformatica.Models.User", b =>
+                {
+                    b.Navigation("ServiceOrders");
                 });
 #pragma warning restore 612, 618
         }

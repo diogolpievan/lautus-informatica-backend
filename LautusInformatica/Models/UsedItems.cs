@@ -3,7 +3,7 @@
     public class UsedItems
     {
         public int Id { get; set; }
-        public bool? IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedDate { get; set; }
 
         public int ServiceOrderId { get; set; }
