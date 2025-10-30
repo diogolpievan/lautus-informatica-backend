@@ -1,4 +1,5 @@
 ﻿using LautusInformatica.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace LautusInformatica.Models
 {
@@ -14,6 +15,9 @@ namespace LautusInformatica.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedDate { get; set; }
+        public bool Lockout { get; set; } = false;
+        public int AccessFailedCount { get; set; } = 0;
+
 
         public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
 
