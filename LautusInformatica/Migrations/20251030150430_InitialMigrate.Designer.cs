@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LautusInformatica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251030123057_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251030150430_InitialMigrate")]
+    partial class InitialMigrate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -142,6 +142,9 @@ namespace LautusInformatica.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -157,6 +160,9 @@ namespace LautusInformatica.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("Lockout")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("PasswordHash")
