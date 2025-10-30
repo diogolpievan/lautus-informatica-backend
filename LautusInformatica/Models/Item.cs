@@ -10,7 +10,7 @@ namespace LautusInformatica.Models
         public int Quantity { get; set; }
         public decimal UnitPrice {  get; set; }
         public ItemCategory Category { get; set; }
-        public bool? IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedDate { get; set; }
 
         public ICollection<UsedItems> UsedItems { get; set; } = new List<UsedItems>();

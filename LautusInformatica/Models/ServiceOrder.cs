@@ -10,11 +10,11 @@ namespace LautusInformatica.Models
         public DateOnly EntryDate { get; set; }
         public DateOnly? CompletionDate { get; set; }
         public Status Status { get; set; } = Status.Pending;
-        public bool? IsDeleted { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedDate { get; set; }
 
-        public int ClientId { get; set; }
-        public Client Client { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
 
         public ICollection<UsedItems> UsedItems { get; set; } = new List<UsedItems>();
     }
