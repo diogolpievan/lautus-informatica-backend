@@ -38,6 +38,48 @@ namespace LautusInformatica.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser(int id, [FromBody] User updatedUser)
+        {
+            if (id != updatedUser.Id)
+                return BadRequest("ID do Usuario nao corresponde");
+
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null || user.IsDeleted == true)
+                return NotFound();
+
+            user.Username = updatedUser.Username;
+            user.Email = updatedUser.Email;
+            user.Phone = updatedUser.Phone;
+            user.Address = updatedUser.Address;
+            user.Role = updatedUser.Role;
+            user.PasswordHash = updatedUser.PasswordHash;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null || user.IsDeleted == true)
+                return NotFound();
+
+            user.IsDeleted = true;
+            user.DeletedDate = DateTime.Now;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
