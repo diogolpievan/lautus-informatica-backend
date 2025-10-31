@@ -123,7 +123,7 @@ namespace LautusInformatica.Migrations
                         DELIMITER ;");
 
             migrationBuilder.Sql(@"DELIMITER //
-                    CREATE PROCEDURE sp_AddUser(
+                    CREATE PROCEDURE sp_CreateUser(
                         IN p_Username VARCHAR(100),
                         IN p_PasswordHash VARCHAR(255),
                         IN p_Phone VARCHAR(20),
