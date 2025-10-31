@@ -10,7 +10,6 @@ namespace LautusInformatica.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-<<<<<<< HEAD
             migrationBuilder.Sql(@"DELIMITER //
             CREATE PROCEDURE sp_ValidaLogin(
                 IN p_Email VARCHAR(50),
@@ -38,13 +37,11 @@ namespace LautusInformatica.Migrations
                         SET failed_count = failed_count + 1;
             
                         IF failed_count >= 3 THEN
-                            -- Bloquear usuário após 3 tentativas
                             UPDATE Users 
                             SET Lockout = TRUE, 
                                 AccessFailedCount = failed_count
                             WHERE Id = user_id;
                         ELSE
-                            -- Apenas incrementar contador
                             UPDATE Users 
                             SET AccessFailedCount = failed_count 
                             WHERE Id = user_id;
@@ -58,8 +55,6 @@ namespace LautusInformatica.Migrations
             DELIMITER ;
             ");
 
-            migrationBuilder.Sql(@"")
-=======
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DesbloquearUsuario(
                                     IN pUserId INT
                                 )
@@ -112,15 +107,91 @@ namespace LautusInformatica.Migrations
                                             SELECT 'Usuário não existe!' AS mensagem;
                                         END IF;
                                     END");
->>>>>>> 219ac3c344d331f9b81645bece1946d494a2f6ce
+
+            migrationBuilder.Sql(@"DELIMITER //
+                        CREATE PROCEDURE sp_ExcluirUsuario(
+                            IN p_UserId INT
+                        )
+                        BEGIN
+                            UPDATE Users
+                            SET IsDeleted = TRUE,
+                                DeletedAt = NOW()
+                            WHERE Id = p_UserId;
+
+                            SELECT ROW_COUNT() AS RowsAffected;
+                        END //
+                        DELIMITER ;");
+
+            migrationBuilder.Sql(@"DELIMITER //
+                    CREATE PROCEDURE sp_AddUser(
+                        IN p_Username VARCHAR(100),
+                        IN p_PasswordHash VARCHAR(255),
+                        IN p_Phone VARCHAR(20),
+                        IN p_Email VARCHAR(255),
+                        IN p_Role INT,
+                        IN p_Address VARCHAR(255)
+                    )
+                    BEGIN
+                        IF EXISTS (SELECT 1 FROM Users WHERE Email = p_Email AND IsDeleted = FALSE) THEN
+                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Email already exists';
+                        END IF;
+
+                        INSERT INTO Users (
+                            Username, PasswordHash, Phone, Email, Role, Address,
+                            CreatedAt, IsDeleted, Lockout, AccessFailedCount
+                        )
+                        VALUES (
+                            p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
+                            NOW(), FALSE, FALSE, 0
+                        );
+
+                        SELECT LAST_INSERT_ID() AS UserId;
+                    END //
+                    DELIMITER ;");
+
+            migrationBuilder.Sql(@"DELIMITER //
+                                    CREATE PROCEDURE sp_UpdateUser(
+                                        IN p_Id INT,
+                                        IN p_Username VARCHAR(100),
+                                        IN p_Phone VARCHAR(20),
+                                        IN p_Email VARCHAR(255),
+                                        IN p_Role INT,
+                                        IN p_Address VARCHAR(255)
+                                    )
+                                    BEGIN
+                                        -- Usuário existe?
+                                        IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = p_Id AND IsDeleted = FALSE) THEN
+                                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User not found';
+                                        END IF;
+
+                                        -- Email já em uso por outro usuário?
+                                        IF EXISTS (SELECT 1 FROM Users WHERE Email = p_Email AND Id <> p_Id AND IsDeleted = FALSE) THEN
+                                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Email already in use by another account';
+                                        END IF;
+
+                                        UPDATE Users
+                                        SET Username = p_Username,
+                                            Phone = p_Phone,
+                                            Email = p_Email,
+                                            Role = p_Role,
+                                            Address = p_Address
+                                        WHERE Id = p_Id;
+
+                                        SELECT ROW_COUNT() AS RowsAffected;
+                                    END //
+                                    DELIMITER ;
+                                    ");
+
         }
-
-
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_DesbloquearUsuario;");
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_TrocarSenha;");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_ValidaLogin;");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_ExcluirUsuario;");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_AddUser;");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_UpdateUser;");
         }
     }
 }
