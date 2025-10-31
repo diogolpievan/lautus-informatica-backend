@@ -10,8 +10,7 @@ namespace LautusInformatica.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"DELIMITER //
-                            CREATE PROCEDURE sp_ValidaLogin(
+            migrationBuilder.Sql(@"CREATE PROCEDURE sp_ValidaLogin(
                                 IN  p_Email VARCHAR(50),
                                 IN  p_PasswordHash VARCHAR(255),
                                 OUT p_IsValid BOOLEAN
@@ -65,10 +64,7 @@ namespace LautusInformatica.Migrations
                                     END IF;
 
                                 END IF;
-                            END //
-                            DELIMITER ;
-
-            ");
+                            END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DesbloquearUsuario(
                                     IN pUserId INT
@@ -87,101 +83,125 @@ namespace LautusInformatica.Migrations
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
                                         IN pUserId INT,
-                                        IN newPass VARCHAR(25),
-                                        OUT ok INT
+                                        IN pNewPasswordHash VARCHAR(255),
+                                        OUT p_Success BOOLEAN
                                     )
                                     BEGIN
-                                        DECLARE userExists INT DEFAULT 0;
-                                        DECLARE isDeleted BOOL DEFAULT FALSE;
-                                        DECLARE isLocked BOOL DEFAULT FALSE;
+                                        DECLARE vUserId INT;
+                                        DECLARE vLocked BOOLEAN;
 
-                                        SELECT COUNT(*) INTO userExists FROM users WHERE Id = pUserId;
+                                        SELECT Id, Lockout
+                                        INTO vUserId, vLocked
+                                        FROM Users
+                                        WHERE Id = pUserId
+                                          AND IsDeleted = FALSE;
 
-                                        IF userExists > 0 THEN
-                                            SELECT IsDeleted, Lockout INTO isDeleted, isLocked FROM users WHERE Id = pUserId;
-
-                                            IF isDeleted = FALSE THEN
-                                                IF isLocked = FALSE THEN
-                                                    UPDATE users
-                                                    SET PasswordHash = newPass
-                                                    WHERE Id = pUserId;
-
-                                                    SET ok = 1;
-                                                    SELECT 'Senha alterada com sucesso!' AS mensagem;
-
-                                                ELSE
-                                                    SET ok = 0;
-                                                    SELECT 'Usuário bloqueado, contate o administrador para desbloquear!' AS mensagem;
-                                                END IF;
-                                            ELSE
-                                                SET ok = 0;
-                                                SELECT 'Usuário foi deletado!' AS mensagem;
-                                            END IF;
-                                        ELSE
-                                            SET ok = 0;
-                                            SELECT 'Usuário não existe!' AS mensagem;
+                                        IF vUserId IS NULL THEN
+                                            SET p_Success = FALSE;
+                                            SIGNAL SQLSTATE '45000'
+                                                SET MESSAGE_TEXT = 'Usuário não encontrado';
                                         END IF;
+
+                                        IF vLocked = TRUE THEN
+                                            SET p_Success = FALSE;
+                                            SIGNAL SQLSTATE '45002'
+                                                SET MESSAGE_TEXT = 'Usuário bloqueado, contate o administrador';
+                                        END IF;
+
+                                        UPDATE Users
+                                        SET PasswordHash = pNewPasswordHash,
+                                            AccessFailedCount = 0,      
+                                            Lockout = FALSE           
+                                        WHERE Id = pUserId;
+
+                                        SET p_Success = TRUE;
                                     END");
 
-            migrationBuilder.Sql(@"DELIMITER //
-                        CREATE PROCEDURE sp_ExcluirUsuario(
-                            IN p_UserId INT
-                        )
-                        BEGIN
-                            UPDATE Users
-                            SET IsDeleted = TRUE,
-                                DeletedAt = NOW()
-                            WHERE Id = p_UserId;
+            migrationBuilder.Sql(@"CREATE PROCEDURE sp_ExcluirUsuario(
+                                        IN p_UserId INT,
+                                        OUT p_Success BOOLEAN
+                                    )
+                                    BEGIN
+                                        DECLARE vUserId INT;
 
-                            SELECT ROW_COUNT() AS RowsAffected;
-                        END //
-                        DELIMITER ;");
+                                        SELECT Id
+                                        INTO vUserId
+                                        FROM Users
+                                        WHERE Id = p_UserId
+                                          AND IsDeleted = FALSE;
 
-            migrationBuilder.Sql(@"DELIMITER //
-                    CREATE PROCEDURE sp_CreateUser(
-                        IN p_Username VARCHAR(100),
-                        IN p_PasswordHash VARCHAR(255),
-                        IN p_Phone VARCHAR(20),
-                        IN p_Email VARCHAR(255),
-                        IN p_Role INT,
-                        IN p_Address VARCHAR(255)
-                    )
-                    BEGIN
-                        IF EXISTS (SELECT 1 FROM Users WHERE Email = p_Email AND IsDeleted = FALSE) THEN
-                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Email already exists';
-                        END IF;
+                                        IF vUserId IS NULL THEN
+                                            SET p_Success = FALSE;
+                                            SIGNAL SQLSTATE '45000'
+                                                SET MESSAGE_TEXT = 'Usuário não encontrado';
+                                        END IF;
 
-                        INSERT INTO Users (
-                            Username, PasswordHash, Phone, Email, Role, Address,
-                            CreatedAt, IsDeleted, Lockout, AccessFailedCount
-                        )
-                        VALUES (
-                            p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
-                            NOW(), FALSE, FALSE, 0
-                        );
+                                        UPDATE Users
+                                        SET IsDeleted = TRUE,
+                                            DeletedAt = NOW()
+                                        WHERE Id = p_UserId;
 
-                        SELECT LAST_INSERT_ID() AS UserId;
-                    END //
-                    DELIMITER ;");
+                                        SET p_Success = TRUE;
+                                    END");
 
-            migrationBuilder.Sql(@"DELIMITER //
-                                    CREATE PROCEDURE sp_UpdateUser(
+            migrationBuilder.Sql(@"CREATE PROCEDURE sp_CreateUser(
+                                        IN p_Username VARCHAR(100),
+                                        IN p_PasswordHash VARCHAR(255),
+                                        IN p_Phone VARCHAR(20),
+                                        IN p_Email VARCHAR(255),
+                                        IN p_Role INT,
+                                        IN p_Address VARCHAR(255),
+                                        OUT p_UserId INT
+                                    )
+                                    BEGIN
+                                        DECLARE vExists INT DEFAULT 0;
+
+                                        SELECT COUNT(*) INTO vExists
+                                        FROM Users
+                                        WHERE Email = p_Email
+                                          AND IsDeleted = FALSE;
+
+                                        IF vExists > 0 THEN
+                                            SIGNAL SQLSTATE '45001'
+                                                SET MESSAGE_TEXT = 'Este email já está sendo utilizado';
+                                        END IF;
+
+                                        INSERT INTO Users (
+                                            Username, PasswordHash, Phone, Email, Role, Address,
+                                            CreatedAt, IsDeleted, Lockout, AccessFailedCount
+                                        )
+                                        VALUES (
+                                            p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
+                                            NOW(), FALSE, FALSE, 0
+                                        );
+
+                                        SET p_UserId = LAST_INSERT_ID();
+                                    END");
+
+            migrationBuilder.Sql(@"CREATE PROCEDURE sp_UpdateUser(
                                         IN p_Id INT,
                                         IN p_Username VARCHAR(100),
                                         IN p_Phone VARCHAR(20),
                                         IN p_Email VARCHAR(255),
                                         IN p_Role INT,
-                                        IN p_Address VARCHAR(255)
+                                        IN p_Address VARCHAR(255),
+                                        OUT p_Success BOOLEAN     
                                     )
                                     BEGIN
-                                        -- Usuário existe?
+                                        DECLARE v_IsLocked BOOLEAN DEFAULT FALSE;
+                                        SET p_Success = FALSE;
+
                                         IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = p_Id AND IsDeleted = FALSE) THEN
-                                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User not found';
+                                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuário não encontrado';
                                         END IF;
 
-                                        -- Email já em uso por outro usuário?
+                                        SELECT Lockout INTO v_IsLocked FROM Users WHERE Id = p_Id;
+                                        IF v_IsLocked = TRUE THEN
+                                            SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'Usuário bloqueado, contate o administrador';
+                                        END IF;
+
                                         IF EXISTS (SELECT 1 FROM Users WHERE Email = p_Email AND Id <> p_Id AND IsDeleted = FALSE) THEN
-                                            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Email already in use by another account';
+                                            SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'Este email já está sendo utilizado';
                                         END IF;
 
                                         UPDATE Users
@@ -192,10 +212,9 @@ namespace LautusInformatica.Migrations
                                             Address = p_Address
                                         WHERE Id = p_Id;
 
-                                        SELECT ROW_COUNT() AS RowsAffected;
-                                    END //
-                                    DELIMITER ;
-                                    ");
+                                        SET p_Success = TRUE;
+                                        SELECT p_Success AS Success;
+                                    END");
 
         }
         /// <inheritdoc />
