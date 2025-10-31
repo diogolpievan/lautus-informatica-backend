@@ -190,7 +190,7 @@ namespace LautusInformatica.Migrations
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_TrocarSenha;");
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_ValidaLogin;");
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_ExcluirUsuario;");
-            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_AddUser;");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_CreateUser;");
             migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_UpdateUser;");
         }
     }
