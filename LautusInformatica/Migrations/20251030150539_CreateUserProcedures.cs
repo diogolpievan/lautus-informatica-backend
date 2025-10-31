@@ -11,48 +11,63 @@ namespace LautusInformatica.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"DELIMITER //
-            CREATE PROCEDURE sp_ValidaLogin(
-                IN p_Email VARCHAR(50),
-                IN p_PasswordHash VARCHAR(255)
-            )
-            BEGIN
-                DECLARE user_id INT;
-                DECLARE user_lockout BOOLEAN;
-                DECLARE failed_count INT;
-                DECLARE stored_hash VARCHAR(255);
-                DECLARE is_valid BOOLEAN DEFAULT FALSE;
+                            CREATE PROCEDURE sp_ValidaLogin(
+                                IN  p_Email VARCHAR(50),
+                                IN  p_PasswordHash VARCHAR(255),
+                                OUT p_IsValid BOOLEAN
+                            )
+                            BEGIN
+                                DECLARE user_id INT;
+                                DECLARE user_lockout BOOLEAN;
+                                DECLARE failed_count INT;
+                                DECLARE stored_hash VARCHAR(255);
 
-                SELECT Id, Lockout, AccessFailedCount, PasswordHash 
-                INTO user_id, user_lockout, failed_count, stored_hash
-                FROM Users 
-                WHERE email = p_Email AND IsDeleted = FALSE;
+                                SET p_IsValid = FALSE;
 
-                IF user_id IS NOT NULL AND user_lockout = FALSE THEN
-                    IF stored_hash = p_PasswordHash THEN
-                        SET is_valid = TRUE;
-                        UPDATE Users 
-                        SET AccessFailedCount = 0 
-                        WHERE Id = user_id;
-                    ELSE
-                        SET failed_count = failed_count + 1;
-            
-                        IF failed_count >= 3 THEN
-                            UPDATE Users 
-                            SET Lockout = TRUE, 
-                                AccessFailedCount = failed_count
-                            WHERE Id = user_id;
-                        ELSE
-                            UPDATE Users 
-                            SET AccessFailedCount = failed_count 
-                            WHERE Id = user_id;
-                        END IF;
-                    END IF;
-                END IF;
+                                SELECT Id, Lockout, AccessFailedCount, PasswordHash
+                                INTO user_id, user_lockout, failed_count, stored_hash
+                                FROM Users
+                                WHERE Email = p_Email AND IsDeleted = FALSE
+                                LIMIT 1;
 
-                SELECT 
-                    is_valid AS LoginValid;
-            END //
-            DELIMITER ;
+                                IF user_id IS NULL THEN
+                                    SIGNAL SQLSTATE '45000'
+                                    SET MESSAGE_TEXT = 'Usuário não encontrado';
+                                END IF;
+
+                                IF user_lockout = TRUE THEN
+                                    SIGNAL SQLSTATE '45002'
+                                    SET MESSAGE_TEXT = 'Usuário bloqueado por tentativas inválidas';
+                                END IF;
+
+                                IF stored_hash = p_PasswordHash THEN
+                                    SET p_IsValid = TRUE;
+
+                                    UPDATE Users
+                                    SET AccessFailedCount = 0
+                                    WHERE Id = user_id;
+
+                                ELSE
+                                    SET failed_count = failed_count + 1;
+
+                                    IF failed_count >= 3 THEN
+                                        UPDATE Users
+                                        SET Lockout = TRUE,
+                                            AccessFailedCount = failed_count
+                                        WHERE Id = user_id;
+
+                                        SIGNAL SQLSTATE '45002'
+                                        SET MESSAGE_TEXT = 'Usuário bloqueado por tentativas inválidas';
+                                    ELSE
+                                        UPDATE Users
+                                        SET AccessFailedCount = failed_count
+                                        WHERE Id = user_id;
+                                    END IF;
+
+                                END IF;
+                            END //
+                            DELIMITER ;
+
             ");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DesbloquearUsuario(
