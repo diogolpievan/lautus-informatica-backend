@@ -81,7 +81,7 @@ namespace LautusInformatica.Migrations
                                         WHERE Id = pUserId;
                                     ELSE
                                         SIGNAL SQLSTATE '45000'
-                                            SET MESSAGE_TEXT = 'Not found';
+                                        SET MESSAGE_TEXT = 'Usuário não encontrado';
                                     END IF;
                                 END");
 
