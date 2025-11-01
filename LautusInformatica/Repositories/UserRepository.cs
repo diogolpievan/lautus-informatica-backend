@@ -29,7 +29,8 @@ namespace LautusInformatica.Repositories
 
         public async Task<IEnumerable<User>> GetAllUsers()
         {
-            return _context.Users.ToList();
+            List<User> allUsers = _context.Users.ToList();
+            return allUsers.SelectMany(allUsers => new List<User> { allUsers }).Where(user => user.IsDeleted.Equals(false));
         }
 
         public async Task<int> CreateUser(User user)
