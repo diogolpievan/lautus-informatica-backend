@@ -1,4 +1,8 @@
 using LautusInformatica.Data;
+using LautusInformatica.Interfaces.Repositories;
+using LautusInformatica.Interfaces.Services;
+using LautusInformatica.Repositories;
+using LautusInformatica.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
