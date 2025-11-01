@@ -1,4 +1,6 @@
-﻿namespace LautusInformatica.DTOs.User
+﻿using LautusInformatica.Models.Enums;
+
+namespace LautusInformatica.DTOs.User
 {
     public class UserRequestDTO
     {
@@ -6,7 +8,7 @@
         public string Password { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
-        public string Role { get; set; }
+        public UserRole Role { get; set; }
         public string Address { get; set; }
     }
 }
