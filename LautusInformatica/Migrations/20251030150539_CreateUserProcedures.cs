@@ -13,68 +13,71 @@ namespace LautusInformatica.Migrations
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_ValidaLogin(
                                 IN  p_Email VARCHAR(50),
                                 IN  p_PasswordHash VARCHAR(255),
-                                OUT p_IsValid BOOLEAN
+                                OUT p_Success BOOLEAN
                             )
                             BEGIN
-                                DECLARE user_id INT;
-                                DECLARE user_lockout BOOLEAN;
-                                DECLARE failed_count INT;
-                                DECLARE stored_hash VARCHAR(255);
+                                DECLARE v_UserId INT;
+                                DECLARE v_IsLocked BOOLEAN;
+                                DECLARE v_FailedCount INT;
+                                DECLARE v_SotredHash VARCHAR(255);
 
-                                SET p_IsValid = FALSE;
+                                SET p_Success = FALSE;
 
-                                SELECT Id, Lockout, AccessFailedCount, PasswordHash
-                                INTO user_id, user_lockout, failed_count, stored_hash
+                                SELECT Id, IsLocked, AccessFailedCount, PasswordHash
+                                INTO v_UserId, v_IsLocked, v_FailedCount, v_SotredHash
                                 FROM Users
                                 WHERE Email = p_Email AND IsDeleted = FALSE
                                 LIMIT 1;
 
-                                IF user_id IS NULL THEN
+                                IF v_UserId IS NULL THEN
                                     SIGNAL SQLSTATE '45000'
                                     SET MESSAGE_TEXT = 'Usuário não encontrado';
                                 END IF;
 
-                                IF user_lockout = TRUE THEN
+                                IF v_IsLocked = TRUE THEN
                                     SIGNAL SQLSTATE '45002'
                                     SET MESSAGE_TEXT = 'Usuário bloqueado por tentativas inválidas';
                                 END IF;
 
-                                IF stored_hash = p_PasswordHash THEN
-                                    SET p_IsValid = TRUE;
+                                IF v_SotredHash = p_PasswordHash THEN
+                                    SET p_Success = TRUE;
 
                                     UPDATE Users
                                     SET AccessFailedCount = 0
-                                    WHERE Id = user_id;
+                                    WHERE Id = v_UserId;
 
                                 ELSE
-                                    SET failed_count = failed_count + 1;
+                                    SET v_FailedCount = v_FailedCount + 1;
 
-                                    IF failed_count >= 3 THEN
+                                    IF v_FailedCount >= 3 THEN
                                         UPDATE Users
-                                        SET Lockout = TRUE,
-                                            AccessFailedCount = failed_count
-                                        WHERE Id = user_id;
+                                        SET IsLocked = TRUE,
+                                            AccessFailedCount = v_FailedCount
+                                        WHERE Id = v_UserId;
 
                                         SIGNAL SQLSTATE '45002'
                                         SET MESSAGE_TEXT = 'Usuário bloqueado por tentativas inválidas';
                                     ELSE
                                         UPDATE Users
-                                        SET AccessFailedCount = failed_count
-                                        WHERE Id = user_id;
+                                        SET AccessFailedCount = v_FailedCount
+                                        WHERE Id = v_UserId;
                                     END IF;
 
                                 END IF;
                             END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DesbloquearUsuario(
-                                    IN pUserId INT
+                                    IN p_UserId INT,
+                                    OUT p_Success BOOLEAN       
                                 )
                                 BEGIN
-                                    IF EXISTS (SELECT 1 FROM users WHERE Id = pUserId) THEN
-                                        UPDATE users
-                                        SET Lockout = 0,
+                                    SET p_Success = FALSE; 
+                                    IF EXISTS (SELECT 1 FROM Users WHERE Id = p_UserId and IsLocked = TRUE) THEN
+                                        UPDATE Users
+                                        SET IsLocked = FALSE,
                                             AccessFailedCount = 0
-                                        WHERE Id = pUserId;
+                                        WHERE Id = p_UserId;
+                                        SET p_Success = TRUE;
                                     ELSE
                                         SIGNAL SQLSTATE '45000'
                                         SET MESSAGE_TEXT = 'Usuário não encontrado';
@@ -82,37 +85,32 @@ namespace LautusInformatica.Migrations
                                 END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
-                                        IN pUserId INT,
-                                        IN pNewPasswordHash VARCHAR(255),
+                                        IN p_UserId INT,
+                                        IN p_NewPasswordHash VARCHAR(255),
                                         OUT p_Success BOOLEAN
                                     )
                                     BEGIN
-                                        DECLARE vUserId INT;
-                                        DECLARE vLocked BOOLEAN;
+                                        DECLARE v_UserId INT;
+                                        DECLARE v_Locked BOOLEAN;
 
-                                        SELECT Id, Lockout
-                                        INTO vUserId, vLocked
+                                        SELECT Id
+                                        INTO v_UserId
                                         FROM Users
-                                        WHERE Id = pUserId
+                                        WHERE Id = p_UserId
                                           AND IsDeleted = FALSE;
 
-                                        IF vUserId IS NULL THEN
+                                        IF v_UserId IS NULL THEN
                                             SET p_Success = FALSE;
                                             SIGNAL SQLSTATE '45000'
                                                 SET MESSAGE_TEXT = 'Usuário não encontrado';
                                         END IF;
-
-                                        IF vLocked = TRUE THEN
-                                            SET p_Success = FALSE;
-                                            SIGNAL SQLSTATE '45002'
-                                                SET MESSAGE_TEXT = 'Usuário bloqueado, contate o administrador';
-                                        END IF;
+                                           
 
                                         UPDATE Users
-                                        SET PasswordHash = pNewPasswordHash,
-                                            AccessFailedCount = 0,      
-                                            Lockout = FALSE           
+                                        SET PasswordHash = p_NewPasswordHash        
                                         WHERE Id = pUserId;
+
+                                        CALL sp_DesbloquearUsuario(p_UserId, @success);
 
                                         SET p_Success = TRUE;
                                     END");
@@ -122,15 +120,15 @@ namespace LautusInformatica.Migrations
                                         OUT p_Success BOOLEAN
                                     )
                                     BEGIN
-                                        DECLARE vUserId INT;
+                                        DECLARE v_UserId INT;
 
                                         SELECT Id
-                                        INTO vUserId
+                                        INTO v_UserId
                                         FROM Users
                                         WHERE Id = p_UserId
                                           AND IsDeleted = FALSE;
 
-                                        IF vUserId IS NULL THEN
+                                        IF v_UserId IS NULL THEN
                                             SET p_Success = FALSE;
                                             SIGNAL SQLSTATE '45000'
                                                 SET MESSAGE_TEXT = 'Usuário não encontrado';
@@ -154,21 +152,21 @@ namespace LautusInformatica.Migrations
                                         OUT p_UserId INT
                                     )
                                     BEGIN
-                                        DECLARE vExists INT DEFAULT 0;
+                                        DECLARE v_Exists INT DEFAULT 0;
 
-                                        SELECT COUNT(*) INTO vExists
+                                        SELECT COUNT(*) INTO v_Exists
                                         FROM Users
                                         WHERE Email = p_Email
                                           AND IsDeleted = FALSE;
 
-                                        IF vExists > 0 THEN
+                                        IF v_Exists > 0 THEN
                                             SIGNAL SQLSTATE '45001'
                                                 SET MESSAGE_TEXT = 'Este email já está sendo utilizado';
                                         END IF;
 
                                         INSERT INTO Users (
                                             Username, PasswordHash, Phone, Email, Role, Address,
-                                            CreatedAt, IsDeleted, Lockout, AccessFailedCount
+                                            CreatedAt, IsDeleted, IsLocked, AccessFailedCount
                                         )
                                         VALUES (
                                             p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
@@ -195,7 +193,7 @@ namespace LautusInformatica.Migrations
                                             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuário não encontrado';
                                         END IF;
 
-                                        SELECT Lockout INTO v_IsLocked FROM Users WHERE Id = p_Id;
+                                        SELECT IsLocked INTO v_IsLocked FROM Users WHERE Id = p_Id;
                                         IF v_IsLocked = TRUE THEN
                                             SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'Usuário bloqueado, contate o administrador';
                                         END IF;
@@ -213,7 +211,6 @@ namespace LautusInformatica.Migrations
                                         WHERE Id = p_Id;
 
                                         SET p_Success = TRUE;
-                                        SELECT p_Success AS Success;
                                     END");
 
         }
