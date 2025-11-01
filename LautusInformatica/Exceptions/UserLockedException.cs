@@ -1,8 +1,8 @@
 ﻿namespace LautusInformatica.Exceptions
 {
-    public class UserBlockedException : AppException
+    public class UserLockedException : AppException
     {
-        public UserBlockedException()
+        public UserLockedException()
             : base(403, "Usuário bloqueado, contate o Administrador")
         {
         }
