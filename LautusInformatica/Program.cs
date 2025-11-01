@@ -26,6 +26,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<LautusInformatica.Middlewares.GlobalExceptionHandlingMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
