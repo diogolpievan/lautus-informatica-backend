@@ -1,6 +1,6 @@
 ﻿namespace LautusInformatica.DTOs
 {
-    public  class ApiResponse<T>
+    public class ApiResponse<T>
     {
         public string Message { get; set; }
         public bool Success { get; set; }
