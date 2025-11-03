@@ -29,7 +29,7 @@ namespace LautusInformatica.Controllers
             
             var apiResponse = new ApiResponse<IEnumerable<UserResponseDTO>>
             {
-                Message = "Users retrieved successfully",
+                Message = "User listado com sucesso",
                 Success = true,
                 Data = users
             };
@@ -44,7 +44,7 @@ namespace LautusInformatica.Controllers
 
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
-                Message = "User listado com sucesso",
+                Message = "User encontrado com sucesso",
                 Success = true,
                 Data = user
             };
