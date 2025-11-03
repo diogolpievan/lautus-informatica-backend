@@ -1,4 +1,5 @@
 using LautusInformatica.Data;
+using LautusInformatica.DTOs;
 using LautusInformatica.DTOs.User;
 using LautusInformatica.Models;
 using LautusInformatica.Services;
@@ -22,34 +23,89 @@ namespace LautusInformatica.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserResponseDTO>>> GetAllUsers()
+        public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDTO>>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsers();
+            
+            var apiResponse = new ApiResponse<IEnumerable<UserResponseDTO>>
+            {
+                Message = "Users retrieved successfully",
+                Success = true,
+                Data = users
+            };
 
-            return Ok(users);
+            return Ok(apiResponse);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseDTO>> GetUserById(int id)
+        public async Task<ActionResult<ApiResponse<UserResponseDTO>>> GetUserById(int id)
         {
             var user = await _userService.GetUserById(id);
 
-            return Ok(user);
+            var apiResponse = new ApiResponse<UserResponseDTO>
+            {
+                Message = "User retrieved successfully",
+                Success = true,
+                Data = user
+            };
+
+            return Ok(apiResponse);
         }
 
-        [HttpGet("by-email/{email}")]
-        public async Task<ActionResult<UserResponseDTO>> GetUserByEmail(string email)
+        [HttpGet("email/{email}")]
+        public async Task<ActionResult<ApiResponse<UserResponseDTO>>> GetUserByEmail(string email)
         {
             var user = await _userService.GetUserByEmail(email);
-            return Ok(user);
+
+            var apiResponse = new ApiResponse<UserResponseDTO>
+            {
+                Message = "User retrieved successfully",
+                Success = true,
+                Data = user
+            };
+
+            return Ok(apiResponse);
         }
 
-        [HttpPost("createUser")]
-        public async Task<ActionResult<UserResponseDTO>> CreateUser([FromBody] UserRequestDTO userRequestDTO)
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<UserResponseDTO>>> CreateUser([FromBody] UserRequestDTO userRequestDTO)
         {
             var user = await _userService.CreateUser(userRequestDTO);
 
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            var apiResponse = new ApiResponse<UserResponseDTO>
+            {
+                Message = "User Criado com sucesso",
+                Success = true,
+                Data = user
+            };
+
+            return CreatedAtAction(nameof(GetUserById), apiResponse);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ApiResponse<UserResponseDTO>>> UpdateUser(int id, [FromBody] UserRequestDTO userRequestDTO)
+        {
+            var user = await _userService.UpdateUser(id, userRequestDTO);
+            var apiResponse = new ApiResponse<UserResponseDTO>
+            {
+                Message = "User updated successfully",
+                Success = true,
+                Data = user
+            };
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(int id)
+        {
+            var result = await _userService.DeleteUser(id);
+            var apiResponse = new ApiResponse<bool>
+            {
+                Message = result ? "User deleted successfully" : "User deletion failed",
+                Success = result,
+                Data = result
+            };
+            return Ok(apiResponse);
         }
 
     }
