@@ -22,6 +22,7 @@ namespace LautusInformatica.Models
 
 
         public ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
+        public ICollection<Log> Logs { get; set; } = new List<Log>();
 
     }
 }
