@@ -44,7 +44,7 @@ namespace LautusInformatica.Controllers
 
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
-                Message = "User retrieved successfully",
+                Message = "User listado com sucesso",
                 Success = true,
                 Data = user
             };
@@ -59,7 +59,7 @@ namespace LautusInformatica.Controllers
 
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
-                Message = "User retrieved successfully",
+                Message = "User encontrado com sucesso",
                 Success = true,
                 Data = user
             };
@@ -74,7 +74,7 @@ namespace LautusInformatica.Controllers
 
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
-                Message = "User Criado com sucesso",
+                Message = "User criado com sucesso",
                 Success = true,
                 Data = user
             };
@@ -88,7 +88,7 @@ namespace LautusInformatica.Controllers
             var user = await _userService.UpdateUser(id, userRequestDTO);
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
-                Message = "User updated successfully",
+                Message = "User atualizado com sucesso",
                 Success = true,
                 Data = user
             };
@@ -101,7 +101,7 @@ namespace LautusInformatica.Controllers
             var result = await _userService.DeleteUser(id);
             var apiResponse = new ApiResponse<bool>
             {
-                Message = result ? "User deleted successfully" : "User deletion failed",
+                Message = result ? "User deletado com successo" : "User deletion failed",
                 Success = result,
                 Data = result
             };
