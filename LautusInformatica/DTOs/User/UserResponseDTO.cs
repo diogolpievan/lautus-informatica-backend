@@ -2,7 +2,7 @@
 
 namespace LautusInformatica.DTOs.User
 {
-    public class UserResponseDTO : ResponseDTO
+    public class UserResponseDTO
     {
         public int Id { get; set; }
         public string Username { get; set; }
