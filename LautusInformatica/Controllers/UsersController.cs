@@ -1,5 +1,7 @@
 using LautusInformatica.Data;
+using LautusInformatica.DTOs.User;
 using LautusInformatica.Models;
+using LautusInformatica.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,85 +13,43 @@ namespace LautusInformatica.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
-        private readonly AppDbContext _context;
+        private readonly UserService _userService;
 
-        public UsersController(ILogger<UsersController> logger, AppDbContext context)
+        public UsersController(ILogger<UsersController> logger, UserService userService)
         {
             _logger = logger;
-            _context = context;
+            _userService = userService;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser([FromBody] User user)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UserResponseDTO>>> GetAllUsers()
         {
-            if (user == null)
-                return BadRequest("Usuário inválido.");
+            var users = await _userService.GetAllUsers();
 
-            bool emailExists = await _context.Users.AnyAsync(u => u.Email == user.Email && u.IsDeleted == false);
-            if (emailExists)
-                return Conflict("Já existe um usuário com este e-mail.");
-
-            user.CreatedAt = DateTime.UtcNow;
-            user.IsDeleted = false;
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, [FromBody] User updatedUser)
-        {
-            if (id != updatedUser.Id)
-                return BadRequest("ID do Usuario nao corresponde");
-
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null || user.IsDeleted == true)
-                return NotFound();
-
-            user.Username = updatedUser.Username;
-            user.Email = updatedUser.Email;
-            user.Phone = updatedUser.Phone;
-            user.Address = updatedUser.Address;
-            user.Role = updatedUser.Role;
-            user.PasswordHash = updatedUser.PasswordHash;
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null || user.IsDeleted == true)
-                return NotFound();
-
-            user.IsDeleted = true;
-            user.DeletedDate = DateTime.Now;
-
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-
+            return Ok(users);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserResponseDTO>> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null || user.IsDeleted == true)
-                return NotFound();
+            var user = await _userService.GetUserById(id);
 
             return Ok(user);
+        }
+
+        [HttpGet("by-email/{email}")]
+        public async Task<ActionResult<UserResponseDTO>> GetUserByEmail(string email)
+        {
+            var user = await _userService.GetUserByEmail(email);
+            return Ok(user);
+        }
+
+        [HttpPost("createUser")]
+        public async Task<ActionResult<UserResponseDTO>> CreateUser([FromBody] UserRequestDTO userRequestDTO)
+        {
+            var user = await _userService.CreateUser(userRequestDTO);
+
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
         }
 
     }

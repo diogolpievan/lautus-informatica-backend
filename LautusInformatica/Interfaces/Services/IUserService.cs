@@ -8,7 +8,7 @@ namespace LautusInformatica.Interfaces.Services
         Task<UserResponseDTO> GetUserByEmail(string email);
         Task<IEnumerable<UserResponseDTO>> GetAllUsers();
         Task<UserResponseDTO> CreateUser(UserRequestDTO userDto);
-        Task<bool> UpdateUser(int id, UserRequestDTO userDto);
+        Task<UserResponseDTO> UpdateUser(int id, UserRequestDTO userDto);
         Task<bool> DeleteUser(int id);
         Task<bool> ChangePassword(int id, string newPassword);
         Task<bool> UnlockUser(int id);
