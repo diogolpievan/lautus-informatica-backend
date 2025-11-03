@@ -19,7 +19,7 @@ namespace LautusInformatica.Services
             _userRepository = userRepository;
             _userService = new UserService(userRepository);
             _config = config;
-        }
+        } 
         public async Task<AuthResponseDTO> UserLoginIsValid(LoginRequestDTO loginUserDto)
         {   
             string email = loginUserDto.Email;
