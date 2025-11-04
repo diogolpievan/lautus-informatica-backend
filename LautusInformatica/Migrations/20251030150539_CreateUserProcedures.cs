@@ -68,6 +68,7 @@ namespace LautusInformatica.Migrations
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DesbloquearUsuario(
                                     IN p_UserId INT,
+                                    IN p_AuthId INT,
                                     OUT p_Success BOOLEAN       
                                 )
                                 BEGIN
@@ -82,10 +83,19 @@ namespace LautusInformatica.Migrations
                                         SIGNAL SQLSTATE '45000'
                                         SET MESSAGE_TEXT = 'Usuário não encontrado';
                                     END IF;
+
+                                    INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
+	                            	        p_AuthId,
+	                            	        'Users',
+	                            	        1,
+	                            	        CONCAT('User: ', p_Username, ' desbloqueado'),
+	                            	        NOW()	                      
+	                                    );
                                 END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
                                         IN p_UserId INT,
+                                        IN p_AuthId INT,
                                         IN p_NewPasswordHash VARCHAR(255),
                                         OUT p_Success BOOLEAN
                                     )
@@ -110,6 +120,14 @@ namespace LautusInformatica.Migrations
                                         SET PasswordHash = p_NewPasswordHash        
                                         WHERE Id = pUserId;
 
+                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
+	                            	        p_AuthId,
+	                            	        'Users',
+	                            	        1,
+	                            	        CONCAT('Senha do User: ', p_Username, ' alterada'),
+	                            	        NOW()	                      
+	                                    );
+
                                         CALL sp_DesbloquearUsuario(p_UserId, @success);
 
                                         SET p_Success = TRUE;
@@ -117,6 +135,7 @@ namespace LautusInformatica.Migrations
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_ExcluirUsuario(
                                         IN p_UserId INT,
+                                        IN p_AuthId INT,
                                         OUT p_Success BOOLEAN
                                     )
                                     BEGIN
@@ -138,6 +157,15 @@ namespace LautusInformatica.Migrations
                                         SET IsDeleted = TRUE,
                                             DeletedAt = NOW()
                                         WHERE Id = p_UserId;
+                                        
+                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
+	                            	        p_AuthId,
+	                            	        'Users',
+	                            	        2,
+	                            	        CONCAT('User: ', p_Username, ' deletado'),
+	                            	        NOW()	                      
+	                                    );
+
 
                                         SET p_Success = TRUE;
                                     END");
@@ -149,6 +177,7 @@ namespace LautusInformatica.Migrations
                                         IN p_Email VARCHAR(255),
                                         IN p_Role INT,
                                         IN p_Address VARCHAR(255),
+                                        IN p_AuthId INT,
                                         OUT p_UserId INT
                                     )
                                     BEGIN
@@ -172,6 +201,14 @@ namespace LautusInformatica.Migrations
                                             p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
                                             NOW(), FALSE, FALSE, 0
                                         );
+
+                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
+	                            	        p_AuthId,
+	                            	        'Users',
+	                            	        0,
+	                            	        CONCAT('User: ', p_Username, ' criado'),
+	                            	        NOW()	                      
+	                                    );
 
                                         SET p_UserId = LAST_INSERT_ID();
                                     END");
@@ -214,7 +251,7 @@ namespace LautusInformatica.Migrations
 	                            	        p_AuthId,
 	                            	        'Users',
 	                            	        1,
-	                            	        CONCAT('User: ', p_Username, 'atualizado'),
+	                            	        CONCAT('User: ', p_Username, ' atualizado'),
 	                            	        NOW()	                      
 	                                    );
                                         SET p_Success = TRUE;
