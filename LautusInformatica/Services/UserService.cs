@@ -174,26 +174,4 @@ public class UserService : IUserService
             }
         }
     }
-    public async Task<bool> UserLoginIsValid(string email, string password)
-    {
-        var user = await _userRepository.GetUserByEmail(email);
-        if (user == null) throw new UserNotFoundException();
-
-        try
-        {
-            return await _userRepository.UserLoginIsValid(email, password);
-        }
-        catch (MySqlException exception)
-        {
-            switch (exception.SqlState)
-            {
-                case "45000":
-                    throw new UserNotFoundException();
-                case "45002":
-                    throw new UserLockedException();
-                default:
-                    throw;
-            }
-        }
-    }
 }

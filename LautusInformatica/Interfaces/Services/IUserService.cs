@@ -12,6 +12,5 @@ namespace LautusInformatica.Interfaces.Services
         Task<bool> DeleteUser(int id);
         Task<bool> ChangePassword(int id, string newPassword);
         Task<bool> UnlockUser(int id);
-        Task<bool> UserLoginIsValid(string email, string password);
     }
 }
