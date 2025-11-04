@@ -210,6 +210,13 @@ namespace LautusInformatica.Migrations
                                             Address = p_Address
                                         WHERE Id = p_Id;
 
+                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
+	                            	        p_AuthId,
+	                            	        'Users',
+	                            	        1,
+	                            	        CONCAT('User: ', p_Username, 'atualizado'),
+	                            	        NOW()	                      
+	                                    );
                                         SET p_Success = TRUE;
                                     END");
 
