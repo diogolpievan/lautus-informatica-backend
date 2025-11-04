@@ -31,6 +31,7 @@ namespace LautusInformatica.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> RegisterUser([FromBody] RegisterRequestDTO registerUserDto)
         {
             var authResponse = await _authService.RegisterUser(registerUserDto);
