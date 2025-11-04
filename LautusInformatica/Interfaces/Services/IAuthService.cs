@@ -5,8 +5,7 @@ namespace LautusInformatica.Interfaces.Services
 {
     public interface IAuthService
     {
-        Task<AuthResponseDTO> UserLoginIsValid(LoginRequestDTO loginUserDto);
+        Task<AuthResponseDTO> LoginUser(LoginRequestDTO loginUserDto);
         Task<AuthResponseDTO> RegisterUser(RegisterRequestDTO registerUserDto);
-        Task<string> GenerateJWTToken(UserResponseDTO userResponseDto);
     }
 }

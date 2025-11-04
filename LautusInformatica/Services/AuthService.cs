@@ -5,6 +5,10 @@ using MySqlConnector;
 using LautusInformatica.DTOs.User;
 using LautusInformatica.Models;
 using LautusInformatica.DTOs.Auth;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace LautusInformatica.Services
 {
@@ -20,7 +24,7 @@ namespace LautusInformatica.Services
             _userService = new UserService(userRepository);
             _config = config;
         } 
-        public async Task<AuthResponseDTO> UserLoginIsValid(LoginRequestDTO loginUserDto)
+        public async Task<AuthResponseDTO> LoginUser(LoginRequestDTO loginUserDto)
         {   
             string email = loginUserDto.Email;
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginUserDto.Password);
@@ -99,7 +103,28 @@ namespace LautusInformatica.Services
 
         private Task<string> GenerateJWTToken(UserResponseDTO userResponseDto)
         {
-            
+            var jwtSettings = _config.GetSection("Jwt");
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, userResponseDto.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, userResponseDto.Email),
+                new Claim(ClaimTypes.Role, userResponseDto.Role.ToString()),
+                new Claim("username", userResponseDto.Username)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(int.Parse(jwtSettings["ExpiresInHours"])),
+                signingCredentials: creds
+            );
+
+            return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
     }
 }
