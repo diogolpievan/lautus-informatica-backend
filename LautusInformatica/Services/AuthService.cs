@@ -36,7 +36,6 @@ namespace LautusInformatica.Services
             {
                 if (_userRepository.UserLoginIsValid(email, hashedPassword).Result)
                 {
-                    //token
                     return new AuthResponseDTO
                     {
                         User = user,
