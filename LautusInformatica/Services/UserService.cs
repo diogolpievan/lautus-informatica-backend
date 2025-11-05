@@ -140,11 +140,9 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
 
-        string newHashedPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
-
         try
         {
-            return await _userRepository.ChangePassword(id, newHashedPassword);
+            return await _userRepository.ChangePassword(id, newPassword);
         }
         catch (MySqlException exception)
         {
@@ -169,6 +167,29 @@ public class UserService : IUserService
             {
                 case "45000":
                     throw new UserNotFoundException();
+                default:
+                    throw;
+            }
+        }
+    }
+
+    public async Task<bool> UserLoginIsValid(string email, string password)
+    {
+        var user = await _userRepository.GetUserByEmail(email);
+        if (user == null) throw new UserNotFoundException();
+
+        try
+        {
+            return await _userRepository.UserLoginIsValid(email, password);
+        }
+        catch (MySqlException exception)
+        {
+            switch (exception.SqlState)
+            {
+                case "45000":
+                    throw new UserNotFoundException();
+                case "45002":
+                    throw new UserLockedException();
                 default:
                     throw;
             }
