@@ -162,6 +162,9 @@ public class UserService : IUserService
     }
     public async Task<bool> UnlockUser(int id)
     {
+        var user = await _userRepository.GetUserById(id);
+        if (user == null) throw new UserNotFoundException();
+
         try
         {
             return await _userRepository.UnlockUser(id);
