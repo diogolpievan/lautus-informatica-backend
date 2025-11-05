@@ -26,10 +26,17 @@ namespace LautusInformatica.Data
             modelBuilder.Entity<Item>().ToTable("Items").HasKey(i => i.Id);
             modelBuilder.Entity<ServiceOrder>().ToTable("ServiceOrders").HasKey(s => s.Id);
             modelBuilder.Entity<UsedItems>().ToTable("UsedItems").HasKey(u => u.Id);
+            modelBuilder.Entity<Log>().ToTable("Logs").HasKey(l => l.Id);
 
             modelBuilder.Entity<ServiceOrder>()
                 .HasOne(s => s.User)
                 .WithMany(c => c.ServiceOrders)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Log>()
+                .HasOne(s => s.User)
+                .WithMany(c => c.Logs)
                 .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
