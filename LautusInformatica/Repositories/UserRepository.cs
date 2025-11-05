@@ -37,7 +37,7 @@ namespace LautusInformatica.Repositories
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Username", user.Username);
-            parameters.Add("@p_PasswordHash", user.PasswordHash);
+            parameters.Add("@p_PasswordHash", user.Password);
             parameters.Add("@p_Phone", user.Phone);
             parameters.Add("@p_Email", user.Email);
             parameters.Add("@p_Role", user.Role);

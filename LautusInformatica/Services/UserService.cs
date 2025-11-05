@@ -63,7 +63,7 @@ public class UserService : IUserService
     {
         var user = new User();
         user.Username = userRequest.Username;
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRequest.Password);
+        user.Password = userRequest.Password;
         user.Phone = userRequest.Phone;
         user.Email = userRequest.Email;
         user.Role = userRequest.Role;

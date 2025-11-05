@@ -8,7 +8,7 @@ namespace LautusInformatica.Models
     {
         public int Id { get; set; }
         public string Username { get; set; }
-        public string PasswordHash { get; set; }
+        public string Password { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
         [Range(0, 1, ErrorMessage = "O campo Role deve ser 0 (Admin) ou 1 (Client).")]

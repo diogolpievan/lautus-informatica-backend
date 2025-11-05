@@ -1,0 +1,38 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace LautusInformatica.Migrations
+{
+    /// <inheritdoc />
+    public partial class AlterUserTablePass : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "PasswordHash",
+                table: "Users",
+                newName: "Password");
+
+            migrationBuilder.RenameColumn(
+                name: "Lockout",
+                table: "Users",
+                newName: "IsLocked");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.RenameColumn(
+                name: "Password",
+                table: "Users",
+                newName: "PasswordHash");
+
+            migrationBuilder.RenameColumn(
+                name: "IsLocked",
+                table: "Users",
+                newName: "Lockout");
+        }
+    }
+}
