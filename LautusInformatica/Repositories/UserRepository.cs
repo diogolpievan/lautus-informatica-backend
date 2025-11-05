@@ -108,7 +108,7 @@ namespace LautusInformatica.Repositories
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
-                await connection.ExecuteAsync("sp_UnlockUser", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                await connection.ExecuteAsync("sp_DesbloquearUsuario", parameters, commandType: System.Data.CommandType.StoredProcedure);
                 bool success = parameters.Get<bool>("@p_Success");
                 return success;
             }
@@ -122,7 +122,7 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
-                await connection.ExecuteAsync("sp_ValidateUserLogin", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                await connection.ExecuteAsync("sp_ValidLogin", parameters, commandType: System.Data.CommandType.StoredProcedure);
                 bool isValid = parameters.Get<bool>("@p_Success");
                 return isValid;
             }
