@@ -185,6 +185,8 @@ public class UserService : IUserService
             {
                 case "45000":
                     throw new UserNotFoundException();
+                case "45002":
+                    throw new UserLockedException();
                 default:
                     throw;
             }
