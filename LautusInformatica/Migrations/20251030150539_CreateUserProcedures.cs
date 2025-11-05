@@ -109,10 +109,11 @@ namespace LautusInformatica.Migrations
                                             SIGNAL SQLSTATE '45000'
                                                 SET MESSAGE_TEXT = 'Usuário não encontrado';
                                         END IF;
-                                           
+                                        
+                                        SET @key = 'G7v$9kLm#4rPz2Q!';
 
                                         UPDATE Users
-                                        SET Password = p_NewPassword        
+                                        SET Password = AES_ENCRYPT(p_NewPassword, @key)        
                                         WHERE Id = pUserId;
 
                                         CALL sp_DesbloquearUsuario(p_UserId, @success);
