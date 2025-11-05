@@ -32,11 +32,8 @@ namespace LautusInformatica.Services
 
             try
             {
-<<<<<<< HEAD
                 if (await _userService.UserLoginIsValid(email, password))
-=======
-                if (_userRepository.UserLoginIsValid(email, password).Result)
->>>>>>> feat/auth
+
                 {
                     return new AuthResponseDTO
                     {
@@ -68,11 +65,6 @@ namespace LautusInformatica.Services
             var existingUser = await _userService.GetUserByEmail(registerDto.Email);
             if (existingUser != null) throw new UserEmailAlreadyExistsException();
 
-<<<<<<< HEAD
-=======
-            string password = registerDto.Password;
-
->>>>>>> feat/auth
             try
             {
                 var userDto = new UserRequestDTO
