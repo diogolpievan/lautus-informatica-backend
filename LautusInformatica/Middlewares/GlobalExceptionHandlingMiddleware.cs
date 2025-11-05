@@ -1,4 +1,5 @@
-﻿using LautusInformatica.Exceptions;
+﻿using LautusInformatica.DTOs;
+using LautusInformatica.Exceptions;
 
 namespace LautusInformatica.Middlewares
 {
@@ -40,7 +41,12 @@ namespace LautusInformatica.Middlewares
 
             context.Response.StatusCode = statusCode;
 
-            var responseObj = new { Error = errorMessage };
+            var responseObj = new ApiResponse<string>
+            {
+                Success = false,
+                Message = errorMessage,
+                Data = null
+            };
             var payload = System.Text.Json.JsonSerializer.Serialize(responseObj);
 
             return context.Response.WriteAsync(payload);
