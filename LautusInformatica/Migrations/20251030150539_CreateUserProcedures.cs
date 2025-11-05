@@ -114,7 +114,7 @@ namespace LautusInformatica.Migrations
 
                                         UPDATE Users
                                         SET Password = AES_ENCRYPT(p_NewPassword, @key)        
-                                        WHERE Id = pUserId;
+                                        WHERE Id = p_UserId;
 
                                         CALL sp_DesbloquearUsuario(p_UserId, @success);
 
