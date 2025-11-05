@@ -12,19 +12,19 @@ namespace LautusInformatica.Migrations
         {
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_ValidaLogin(
                                 IN  p_Email VARCHAR(50),
-                                IN  p_PasswordHash VARCHAR(255),
+                                IN  p_Password VARCHAR(255),
                                 OUT p_Success BOOLEAN
                             )
                             BEGIN
                                 DECLARE v_UserId INT;
                                 DECLARE v_IsLocked BOOLEAN;
                                 DECLARE v_FailedCount INT;
-                                DECLARE v_SotredHash VARCHAR(255);
+                                DECLARE v_Sotred VARCHAR(255);
 
                                 SET p_Success = FALSE;
 
-                                SELECT Id, IsLocked, AccessFailedCount, PasswordHash
-                                INTO v_UserId, v_IsLocked, v_FailedCount, v_SotredHash
+                                SELECT Id, IsLocked, AccessFailedCount, Password
+                                INTO v_UserId, v_IsLocked, v_FailedCount, v_Sotred
                                 FROM Users
                                 WHERE Email = p_Email AND IsDeleted = FALSE
                                 LIMIT 1;
@@ -39,7 +39,7 @@ namespace LautusInformatica.Migrations
                                     SET MESSAGE_TEXT = 'Usuário bloqueado por tentativas inválidas';
                                 END IF;
 
-                                IF v_SotredHash = p_PasswordHash THEN
+                                IF v_Sotred = p_Password THEN
                                     SET p_Success = TRUE;
 
                                     UPDATE Users
@@ -96,7 +96,7 @@ namespace LautusInformatica.Migrations
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
                                         IN p_UserId INT,
                                         IN p_AuthId INT,
-                                        IN p_NewPasswordHash VARCHAR(255),
+                                        IN p_NewPassword VARCHAR(255),
                                         OUT p_Success BOOLEAN
                                     )
                                     BEGIN
@@ -117,7 +117,7 @@ namespace LautusInformatica.Migrations
                                            
 
                                         UPDATE Users
-                                        SET PasswordHash = p_NewPasswordHash        
+                                        SET Password = p_NewPassword        
                                         WHERE Id = pUserId;
 
                                         INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
@@ -172,7 +172,7 @@ namespace LautusInformatica.Migrations
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_CreateUser(
                                         IN p_Username VARCHAR(100),
-                                        IN p_PasswordHash VARCHAR(255),
+                                        IN p_Password VARCHAR(255),
                                         IN p_Phone VARCHAR(20),
                                         IN p_Email VARCHAR(255),
                                         IN p_Role INT,
@@ -194,11 +194,11 @@ namespace LautusInformatica.Migrations
                                         END IF;
 
                                         INSERT INTO Users (
-                                            Username, PasswordHash, Phone, Email, Role, Address,
+                                            Username, Password, Phone, Email, Role, Address,
                                             CreatedAt, IsDeleted, IsLocked, AccessFailedCount
                                         )
                                         VALUES (
-                                            p_Username, p_PasswordHash, p_Phone, p_Email, p_Role, p_Address,
+                                            p_Username, p_Password, p_Phone, p_Email, p_Role, p_Address,
                                             NOW(), FALSE, FALSE, 0
                                         );
 
