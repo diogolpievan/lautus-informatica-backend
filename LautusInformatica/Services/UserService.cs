@@ -4,6 +4,7 @@ using LautusInformatica.Interfaces.Repositories;
 using LautusInformatica.Exceptions;
 using LautusInformatica.Models;
 using MySqlConnector;
+using LautusInformatica.DTOs.Auth;
 
 namespace LautusInformatica.Services;
 public class UserService : IUserService
@@ -135,14 +136,18 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> ChangePassword(int id, string newPassword)
+    public async Task<bool> ChangePassword(int id, ChangePasswordDTO changePasswordDTO)
     {
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
 
         try
         {
-            return await _userRepository.ChangePassword(id, newPassword);
+            if (changePasswordDTO.NewPassword != changePasswordDTO.VerifyNewPassword)
+            {
+                throw new BadRequestException();
+            }
+            return await _userRepository.ChangePassword(id, changePasswordDTO.NewPassword);
         }
         catch (MySqlException exception)
         {

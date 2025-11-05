@@ -119,7 +119,7 @@ namespace LautusInformatica.Controllers
         [HttpPost("{id}/change-password")]
         public async Task<ActionResult<ApiResponse<bool>>> ChangePassword(int id, [FromBody] ChangePasswordDTO changePasswordDTO)
         {
-            var result = await _userService.ChangePassword(id, changePasswordDTO.NewPassword);
+            var result = await _userService.ChangePassword(id, changePasswordDTO);
             var apiResponse = new ApiResponse<bool>
             {
                 Message = result ? "Senha alterada com sucesso" : "Falha ao alterar a senha",
