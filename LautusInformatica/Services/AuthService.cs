@@ -25,14 +25,18 @@ namespace LautusInformatica.Services
         public async Task<AuthResponseDTO> LoginUser(LoginRequestDTO loginUserDto)
         {   
             string email = loginUserDto.Email;
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginUserDto.Password, _config["FixedSalt"]);
+            string password = loginUserDto.Password;
 
             var user = await _userService.GetUserByEmail(email);
             if (user == null) throw new UserNotFoundException();
 
             try
             {
-                if (await _userService.UserLoginIsValid(email, hashedPassword))
+<<<<<<< HEAD
+                if (await _userService.UserLoginIsValid(email, password))
+=======
+                if (_userRepository.UserLoginIsValid(email, password).Result)
+>>>>>>> feat/auth
                 {
                     return new AuthResponseDTO
                     {
@@ -64,6 +68,11 @@ namespace LautusInformatica.Services
             var existingUser = await _userService.GetUserByEmail(registerDto.Email);
             if (existingUser != null) throw new UserEmailAlreadyExistsException();
 
+<<<<<<< HEAD
+=======
+            string password = registerDto.Password;
+
+>>>>>>> feat/auth
             try
             {
                 var userDto = new UserRequestDTO
