@@ -37,7 +37,7 @@ namespace LautusInformatica.Repositories
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Username", user.Username);
-            parameters.Add("@p_PasswordHash", user.Password);
+            parameters.Add("@p_Password", user.Password);
             parameters.Add("@p_Phone", user.Phone);
             parameters.Add("@p_Email", user.Email);
             parameters.Add("@p_Role", user.Role);
@@ -85,11 +85,11 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> ChangePassword(int id, string newPasswordHash)
+        public async Task<bool> ChangePassword(int id, string newPassword)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
-            parameters.Add("@p_NewPasswordHash", newPasswordHash);
+            parameters.Add("@p_NewPassword", newPassword);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
@@ -114,11 +114,11 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> UserLoginIsValid(string email, string passwordHash)
+        public async Task<bool> UserLoginIsValid(string email, string password)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Email", email);
-            parameters.Add("@p_PasswordHash", passwordHash);
+            parameters.Add("@p_Password", password);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
