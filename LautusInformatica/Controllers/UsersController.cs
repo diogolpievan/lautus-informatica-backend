@@ -128,5 +128,19 @@ namespace LautusInformatica.Controllers
             };
             return Ok(apiResponse);
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("{id}/lock")]
+        public async Task<ActionResult<ApiResponse<bool>>> UnlockUser(int id)
+        {
+            var result = await _userService.UnlockUser(id);
+            var apiResponse = new ApiResponse<bool>
+            {
+                Message = result ? "User desbloqueado com sucesso" : "Falha ao desbloquear o user",
+                Success = result,
+                Data = result
+            };
+            return Ok(apiResponse);
+        }
     }
 }
