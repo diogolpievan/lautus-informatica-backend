@@ -23,6 +23,7 @@ namespace LautusInformatica.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDTO>>>> GetAllUsers()
         {
