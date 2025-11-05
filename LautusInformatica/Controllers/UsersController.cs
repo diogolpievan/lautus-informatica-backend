@@ -1,6 +1,7 @@
 using LautusInformatica.Data;
 using LautusInformatica.DTOs;
 using LautusInformatica.DTOs.User;
+using LautusInformatica.DTOs.Auth;
 using LautusInformatica.Models;
 using LautusInformatica.Services;
 using Microsoft.AspNetCore.Authorization;
