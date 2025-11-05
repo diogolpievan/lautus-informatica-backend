@@ -145,7 +145,7 @@ public class UserService : IUserService
         {
             if (changePasswordDTO.NewPassword != changePasswordDTO.VerifyNewPassword)
             {
-                throw new BadRequestException();
+                throw new BadRequestException("As senhas não coincidem");
             }
             return await _userRepository.ChangePassword(id, changePasswordDTO.NewPassword);
         }
