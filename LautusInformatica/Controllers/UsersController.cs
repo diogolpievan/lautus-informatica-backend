@@ -3,6 +3,7 @@ using LautusInformatica.DTOs;
 using LautusInformatica.DTOs.User;
 using LautusInformatica.Models;
 using LautusInformatica.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ namespace LautusInformatica.Controllers
         public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDTO>>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsers();
-            
+
             var apiResponse = new ApiResponse<IEnumerable<UserResponseDTO>>
             {
                 Message = "User listado com sucesso",
@@ -37,6 +38,7 @@ namespace LautusInformatica.Controllers
             return Ok(apiResponse);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<UserResponseDTO>>> GetUserById(int id)
         {
@@ -52,6 +54,7 @@ namespace LautusInformatica.Controllers
             return Ok(apiResponse);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("email/{email}")]
         public async Task<ActionResult<ApiResponse<UserResponseDTO>>> GetUserByEmail(string email)
         {
@@ -82,6 +85,7 @@ namespace LautusInformatica.Controllers
             return CreatedAtAction(nameof(GetUserById), apiResponse);
         }
 
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<UserResponseDTO>>> UpdateUser(int id, [FromBody] UserRequestDTO userRequestDTO)
         {
@@ -95,6 +99,7 @@ namespace LautusInformatica.Controllers
             return Ok(apiResponse);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(int id)
         {
@@ -108,5 +113,18 @@ namespace LautusInformatica.Controllers
             return Ok(apiResponse);
         }
 
+        [Authorize]
+        [HttpPost("{id}/change-password")]
+        public async Task<ActionResult<ApiResponse<bool>>> ChangePassword(int id, [FromBody] ChangePasswordDTO changePasswordDTO)
+        {
+            var result = await _userService.ChangePassword(id, changePasswordDTO.NewPassword);
+            var apiResponse = new ApiResponse<bool>
+            {
+                Message = result ? "Senha alterada com sucesso" : "Falha ao alterar a senha",
+                Success = result,
+                Data = result
+            };
+            return Ok(apiResponse);
+        }
     }
 }
