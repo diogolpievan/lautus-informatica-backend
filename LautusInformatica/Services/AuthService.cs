@@ -15,26 +15,24 @@ namespace LautusInformatica.Services
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _config;
-        private readonly IUserRepository _userRepository;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public AuthService(IUserRepository userRepository, IConfiguration config)
+        public AuthService(IConfiguration config, IUserService userService)
         {
-            _userRepository = userRepository;
-            _userService = new UserService(userRepository);
+            _userService = userService;
             _config = config;
         } 
         public async Task<AuthResponseDTO> LoginUser(LoginRequestDTO loginUserDto)
         {   
             string email = loginUserDto.Email;
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginUserDto.Password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginUserDto.Password, _config["FixedSalt"]);
 
             var user = await _userService.GetUserByEmail(email);
             if (user == null) throw new UserNotFoundException();
 
             try
             {
-                if (_userRepository.UserLoginIsValid(email, hashedPassword).Result)
+                if (await _userService.UserLoginIsValid(email, hashedPassword))
                 {
                     return new AuthResponseDTO
                     {
@@ -66,8 +64,6 @@ namespace LautusInformatica.Services
             var existingUser = await _userService.GetUserByEmail(registerDto.Email);
             if (existingUser != null) throw new UserEmailAlreadyExistsException();
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-
             try
             {
                 var userDto = new UserRequestDTO
@@ -80,7 +76,7 @@ namespace LautusInformatica.Services
                     Address = registerDto.Address
                 };
 
-                var createdUser = _userService.CreateUser(userDto).Result;
+                var createdUser = await _userService.CreateUser(userDto);
 
                 return new AuthResponseDTO
                 {
