@@ -78,6 +78,8 @@ namespace LautusInformatica.Migrations
                                     OUT p_Success BOOLEAN       
                                 )
                                 BEGIN
+                                    DECLARE v_LogId INT;
+
                                     SET p_Success = FALSE; 
                                     IF EXISTS (SELECT 1 FROM Users WHERE Id = p_UserId and IsLocked = TRUE) THEN
                                         UPDATE Users
@@ -108,7 +110,7 @@ namespace LautusInformatica.Migrations
                                     BEGIN
                                         DECLARE v_UserId INT;
                                         DECLARE v_Locked BOOLEAN;
-
+                                        DECLARE v_LogId INT;
                                         SELECT Id
                                         INTO v_UserId
                                         FROM Users
@@ -146,6 +148,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_UserId INT;
+                                        DECLARE v_LogId INT;
 
                                         SELECT Id
                                         INTO v_UserId
@@ -164,13 +167,13 @@ namespace LautusInformatica.Migrations
                                             DeletedAt = NOW()
                                         WHERE Id = p_UserId;
                                         
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        2,
-	                            	        CONCAT('User: ', p_Username, ' deletado'),
-	                            	        NOW()	                      
-	                                    );
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            2,
+                                            CONCAT('Usuário excluído - ID: ', p_UserId),
+                                            v_LogId
+                                        );
 
 
                                         SET p_Success = TRUE;
@@ -188,6 +191,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_Exists INT DEFAULT 0;
+                                        DECLARE v_LogId INT;
 
                                         SELECT COUNT(*) INTO v_Exists
                                         FROM Users
@@ -232,6 +236,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_IsLocked BOOLEAN DEFAULT FALSE;
+                                        DECLARE v_LogId INT;
                                         SET p_Success = FALSE;
 
                                         IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = p_Id AND IsDeleted = FALSE) THEN
