@@ -88,13 +88,12 @@ namespace LautusInformatica.Repositories
                 return success;
             }
         }
-        public async Task<bool> AdjustStock(int id, int quantity, int authId, string reason)
+        public async Task<bool> AdjustStock(int id, int quantity, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
             parameters.Add("@p_Quantity", quantity);
             parameters.Add("@p_AuthId", authId);
-            parameters.Add("@p_Reason", reason);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {

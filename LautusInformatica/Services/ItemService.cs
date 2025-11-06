@@ -155,13 +155,13 @@ namespace LautusInformatica.Services
                 }
             }
         }
-        public async Task<bool> AdjustStock(int id, int quantity, int authId, string reason)
+        public async Task<bool> AdjustStock(int id, int quantity, int authId)
         {
             var existingItem = await GetItemById(id);
             if (existingItem == null) throw new ItemNotFoundException();
             try
             {
-                return await _itemRepository.AdjustStock(id, quantity, authId, reason);
+                return await _itemRepository.AdjustStock(id, quantity, authId);
             }
             catch (MySqlException exception)
             {
@@ -169,7 +169,7 @@ namespace LautusInformatica.Services
                 {
                     case "45000":
                         throw new ItemNotFoundException();
-                    case "43000": 
+                    case "45003": 
                         throw new InsufficientStockException();
                     default:
                         throw;

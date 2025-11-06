@@ -12,6 +12,6 @@ namespace LautusInformatica.Interfaces.Services
         public Task<ItemResponseDTO> CreateItem(ItemRequestDTO item, int authId);
         public Task<ItemResponseDTO> UpdateItem(int id, ItemRequestDTO item, int authId);
         public Task<bool> DeleteItem(int id, int authId);
-        public Task<bool> AdjustStock(int id, int quantity, int authId, string reason);
+        public Task<bool> AdjustStock(int id, int quantity, int authId);
     }
 }

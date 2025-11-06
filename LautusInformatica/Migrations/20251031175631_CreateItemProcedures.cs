@@ -152,7 +152,6 @@ namespace LautusInformatica.Migrations
                                     IN p_Id INT,
                                     IN p_Quantity INT,
                                     IN p_AuthId INT,
-                                    IN p_Reason VARCHAR(255),
                                     OUT p_Success BOOLEAN
                                 )
                                 BEGIN
@@ -190,8 +189,7 @@ namespace LautusInformatica.Migrations
                                         CONCAT('Ajuste de estoque - Item: ', v_ItemName, 
                                                ' (ID: ', p_Id, ') - Quantidade: ', p_Quantity,
                                                ' - Estoque anterior: ', v_CurrentQuantity,
-                                               ' - Novo estoque: ', v_NewQuantity,
-                                               ' - Motivo: ', p_Reason),
+                                               ' - Novo estoque: ', v_NewQuantity),
                                         v_LogId
                                     );
 

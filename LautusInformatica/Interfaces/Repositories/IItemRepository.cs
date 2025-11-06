@@ -12,7 +12,7 @@ namespace LautusInformatica.Interfaces.Repositories
         public Task<int> CreateItem(Item item, int authId);
         public Task<bool> UpdateItem(Item item, int authId);
         public Task<bool> DeleteItem(int id, int authId);
-        public Task<bool> AdjustStock(int id, int quantity, int authId, string reason);
+        public Task<bool> AdjustStock(int id, int quantity, int authId);
 
     }
 }
