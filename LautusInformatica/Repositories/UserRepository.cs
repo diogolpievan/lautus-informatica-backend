@@ -15,16 +15,16 @@ namespace LautusInformatica.Repositories
         {
             _context = context;
         }
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            return user;
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
-            var user = await _context.Users.FindAsync(email);
-            return user;
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
 
         public async Task<IEnumerable<User>> GetAllUsers()
