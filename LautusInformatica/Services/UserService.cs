@@ -2,6 +2,7 @@
 using LautusInformatica.Interfaces.Services;
 using LautusInformatica.Interfaces.Repositories;
 using LautusInformatica.Exceptions;
+using LautusInformatica.Exceptions.NotFound;
 using LautusInformatica.Models;
 using MySqlConnector;
 using LautusInformatica.DTOs.Auth;

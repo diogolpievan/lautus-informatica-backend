@@ -1,4 +1,5 @@
-﻿using LautusInformatica.DTOs.User;
+﻿using LautusInformatica.DTOs.Auth;
+using LautusInformatica.DTOs.User;
 
 namespace LautusInformatica.Interfaces.Services
 {
@@ -12,6 +13,6 @@ namespace LautusInformatica.Interfaces.Services
         Task<bool> DeleteUser(int id);
         Task<bool> ChangePassword(int id, string newPassword);
         Task<bool> UnlockUser(int id);
-        Task<bool> UserLoginIsValid(string email, string password);
+        Task<bool> UserLoginIsValid(string email, ChangePasswordDTO changePasswordDTO);
     }
 }
