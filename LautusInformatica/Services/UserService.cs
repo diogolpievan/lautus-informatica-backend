@@ -6,6 +6,7 @@ using LautusInformatica.Exceptions.NotFound;
 using LautusInformatica.Models;
 using MySqlConnector;
 using LautusInformatica.DTOs.Auth;
+using LautusInformatica.Exceptions.AlreadyExists;
 
 namespace LautusInformatica.Services;
 public class UserService : IUserService
