@@ -11,8 +11,8 @@ namespace LautusInformatica.Interfaces.Services
         Task<UserResponseDTO> CreateUser(UserRequestDTO userDto);
         Task<UserResponseDTO> UpdateUser(int id, UserRequestDTO userDto);
         Task<bool> DeleteUser(int id);
-        Task<bool> ChangePassword(int id, string newPassword);
+        Task<bool> ChangePassword(int id, ChangePasswordDTO changePasswordDTO);
         Task<bool> UnlockUser(int id);
-        Task<bool> UserLoginIsValid(string email, ChangePasswordDTO changePasswordDTO);
+        Task<bool> UserLoginIsValid(string email, string password);
     }
 }
