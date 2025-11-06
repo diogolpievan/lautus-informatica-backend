@@ -6,6 +6,7 @@ using LautusInformatica.Models;
 using MySqlConnector;
 using LautusInformatica.Exceptions.AlreadyExists;
 using LautusInformatica.Exceptions;
+using LautusInformatica.Models.Enums;
 
 
 namespace LautusInformatica.Services
@@ -22,7 +23,7 @@ namespace LautusInformatica.Services
         {
 
             var item = await _itemRepository.GetItemById(id);
-            if (item == null) return throw new ItemNotFoundException();
+            if (item == null) throw new ItemNotFoundException();
             return new ItemResponseDTO
             {
                 Id = item.Id,
@@ -48,7 +49,7 @@ namespace LautusInformatica.Services
                 Category = item.Category
             });
         }
-        public async Task<IEnumerable<ItemResponseDTO>?> GetItemsByCategory(Models.Enums.ItemCategory category)
+        public async Task<IEnumerable<ItemResponseDTO>?> GetItemsByCategory(ItemCategory category)
         {
             var items = await _itemRepository.GetItemsByCategory(category);
             if (items == null || !items.Any()) return null;
