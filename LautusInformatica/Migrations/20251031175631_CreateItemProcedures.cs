@@ -147,43 +147,6 @@ namespace LautusInformatica.Migrations
                                     SET p_Success = TRUE;
                                 END");
 
-            // Procedure para restaurar item
-            migrationBuilder.Sql(@"CREATE PROCEDURE sp_RestoreItem(
-                                    IN p_Id INT,
-                                    IN p_AuthId INT,
-                                    OUT p_Success BOOLEAN
-                                )
-                                BEGIN
-                                    DECLARE v_ItemName VARCHAR(100);
-                                    DECLARE v_LogId INT;
-
-                                    SELECT Name INTO v_ItemName
-                                    FROM Items
-                                    WHERE Id = p_Id
-                                      AND IsDeleted = TRUE;
-
-                                    IF v_ItemName IS NULL THEN
-                                        SET p_Success = FALSE;
-                                        SIGNAL SQLSTATE '45000'
-                                            SET MESSAGE_TEXT = 'Item não encontrado ou já ativo';
-                                    END IF;
-
-                                    UPDATE Items
-                                    SET IsDeleted = FALSE,
-                                        DeletedDate = NULL
-                                    WHERE Id = p_Id;
-
-                                    CALL sp_CreateLog(
-                                        p_AuthId,
-                                        'Items',
-                                        1,
-                                        CONCAT('Item restaurado - ID: ', p_Id, ' - Nome: ', v_ItemName),
-                                        v_LogId
-                                    );
-
-                                    SET p_Success = TRUE;
-                                END");
-
             // Procedure para ajustar estoque
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_AdjustStock(
                                     IN p_Id INT,
@@ -210,7 +173,7 @@ namespace LautusInformatica.Migrations
                                     END IF;
 
                                     IF p_Quantity < 0 AND v_CurrentQuantity < ABS(p_Quantity) THEN
-                                        SIGNAL SQLSTATE '45004'
+                                        SIGNAL SQLSTATE '45003'
                                             SET MESSAGE_TEXT = 'Estoque insuficiente para esta operação';
                                     END IF;
 
