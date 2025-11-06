@@ -90,13 +90,13 @@ namespace LautusInformatica.Migrations
                                         SET MESSAGE_TEXT = 'Usuário não encontrado';
                                     END IF;
 
-                                    INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('User: ', p_Username, ' desbloqueado'),
-	                            	        NOW()	                      
-	                                    );
+                                    CALL sp_CreateLog(
+                                        p_AuthId,
+                                        'Users',
+                                        1,
+                                        CONCAT('Usuário desbloqueado - ID: ', p_UserId),
+                                        v_LogId
+                                    );
                                 END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
@@ -127,13 +127,12 @@ namespace LautusInformatica.Migrations
                                         SET Password = AES_ENCRYPT(p_NewPassword, @key)        
                                         WHERE Id = p_UserId;
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('Senha do User: ', p_Username, ' alterada'),
-	                            	        NOW()	                      
-	                                    );
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            1,
+                                            CONCAT('Senha alterada - User ID: ', p_UserId),
+                                            v_LogId);
 
                                         CALL sp_DesbloquearUsuario(p_UserId, @success);
 
@@ -211,13 +210,13 @@ namespace LautusInformatica.Migrations
                                             NOW(), FALSE, FALSE, 0
                                         );
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        0,
-	                            	        CONCAT('User: ', p_Username, ' criado'),
-	                            	        NOW()	                      
-	                                    );
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            0,
+                                            CONCAT('Usuário criado - ID: ', p_UserId, ' - Nome: ', p_Username),
+                                            v_LogId
+                                        );
 
                                         SET p_UserId = LAST_INSERT_ID();
                                     END");
@@ -256,13 +255,13 @@ namespace LautusInformatica.Migrations
                                             Address = p_Address
                                         WHERE Id = p_Id;
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('User: ', p_Username, ' atualizado'),
-	                            	        NOW()	                      
-	                                    );
+                                       CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            1,
+                                            CONCAT('Usuário atualizado - ID: ', p_Id, ' - Nome: ', p_Username),
+                                            v_LogId
+                                        );
                                         SET p_Success = TRUE;
                                     END");
 
