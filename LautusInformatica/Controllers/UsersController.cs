@@ -138,7 +138,6 @@ namespace LautusInformatica.Controllers
             {
                 Message = result ? "User desbloqueado com sucesso" : "Falha ao desbloquear o user",
                 Success = result,
-                Data = result
             };
             return Ok(apiResponse);
         }
