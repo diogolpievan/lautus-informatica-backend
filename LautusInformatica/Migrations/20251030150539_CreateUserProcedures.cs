@@ -42,7 +42,7 @@ namespace LautusInformatica.Migrations
 
                                 SET @key = 'G7v$9kLm#4rPz2Q!';
 
-                                SET v_DecryptedPass = CAST(AES_DECRYPT(v_StoredPass, @key) AS CHAR);
+                                SET v_DecryptedPass = TO_BASE64(AES_DECRYPT(v_StoredPass, @key));
 
                                
                                  IF v_DecryptPass = p_Password THEN
@@ -210,19 +210,21 @@ namespace LautusInformatica.Migrations
                                             CreatedAt, IsDeleted, IsLocked, AccessFailedCount
                                         )
                                         VALUES (
-                                            p_Username, AES_ENCRYPT(p_Password, @key), p_Phone, p_Email, p_Role, p_Address,
+                                            p_Username, TO_BASE64(AES_ENCRYPT(p_Password, @key)), p_Phone, p_Email, p_Role, p_Address,
                                             NOW(), FALSE, FALSE, 0
                                         );
 
+                                        SET p_UserId = LAST_INSERT_ID();
+
+                                        SET @desc = CONCAT('Usuário criado - ID: ', p_UserId, ' - Nome: ', p_Username);
                                         CALL sp_CreateLog(
                                             p_AuthId,
                                             'Users',
                                             0,
-                                            CONCAT('Usuário criado - ID: ', p_UserId, ' - Nome: ', p_Username),
+                                            @desc,
                                             v_LogId
                                         );
 
-                                        SET p_UserId = LAST_INSERT_ID();
                                     END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_UpdateUser(
