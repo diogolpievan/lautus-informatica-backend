@@ -62,7 +62,7 @@ namespace LautusInformatica.Services
             }
         }
 
-        public async Task<AuthResponseDTO> RegisterUser(RegisterRequestDTO registerDto)
+        public async Task<AuthResponseDTO> RegisterUser(RegisterRequestDTO registerDto, int authId)
         {
             var existingUser = await _userService.GetUserByEmail(registerDto.Email);
             if (existingUser != null) throw new UserEmailAlreadyExistsException();
@@ -79,7 +79,7 @@ namespace LautusInformatica.Services
                     Address = registerDto.Address
                 };
 
-                var createdUser = await _userService.CreateUser(userDto);
+                var createdUser = await _userService.CreateUser(userDto, authId);
 
                 return new AuthResponseDTO
                 {

@@ -7,6 +7,7 @@ using LautusInformatica.Models;
 using MySqlConnector;
 using LautusInformatica.DTOs.Auth;
 using LautusInformatica.Exceptions.AlreadyExists;
+using System.Linq;
 
 namespace LautusInformatica.Services;
 public class UserService : IUserService
@@ -33,10 +34,10 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<UserResponseDTO> GetUserByEmail(string email)
+    public async Task<UserResponseDTO?> GetUserByEmail(string email)
     {
         var user = await _userRepository.GetUserByEmail(email);
-        if (user == null) throw new UserNotFoundException();
+        if (user == null) return null;
         return new UserResponseDTO
         {
             Id = user.Id,
@@ -62,7 +63,7 @@ public class UserService : IUserService
         });
     }
 
-    public async Task<UserResponseDTO> CreateUser(UserRequestDTO userRequest)
+    public async Task<UserResponseDTO> CreateUser(UserRequestDTO userRequest, int authId)
     {
         var user = new User();
         user.Username = userRequest.Username;
@@ -74,7 +75,7 @@ public class UserService : IUserService
 
         try
         {
-            int createdUserId = await _userRepository.CreateUser(user);
+            int createdUserId = await _userRepository.CreateUser(user, authId);
             return await GetUserById(createdUserId);
         }
         catch (MySqlException exception)
@@ -90,7 +91,7 @@ public class UserService : IUserService
 
     }
 
-    public async Task<UserResponseDTO> UpdateUser(int id, UserRequestDTO userRequest)
+    public async Task<UserResponseDTO> UpdateUser(int id, UserRequestDTO userRequest, int authId)
     {
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
@@ -102,7 +103,7 @@ public class UserService : IUserService
 
         try
         {
-            await _userRepository.UpdateUser(user);
+            await _userRepository.UpdateUser(user, authId);
             return await GetUserById(id);
         }
         catch (MySqlException exception)
@@ -120,11 +121,11 @@ public class UserService : IUserService
             }
         }
     }
-    public async Task<bool> DeleteUser(int id)
+    public async Task<bool> DeleteUser(int id, int authId)
     {
         try
         {
-            return await _userRepository.DeleteUser(id);
+            return await _userRepository.DeleteUser(id, authId);
         }
         catch (MySqlException exception)
         {
@@ -138,7 +139,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> ChangePassword(int id, ChangePasswordDTO changePasswordDTO)
+    public async Task<bool> ChangePassword(int id, ChangePasswordDTO changePasswordDTO, int authId)
     {
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
@@ -149,7 +150,7 @@ public class UserService : IUserService
             {
                 throw new BadRequestException("As senhas não coincidem");
             }
-            return await _userRepository.ChangePassword(id, changePasswordDTO.NewPassword);
+            return await _userRepository.ChangePassword(id, changePasswordDTO.NewPassword, authId);
         }
         catch (MySqlException exception)
         {
@@ -162,14 +163,14 @@ public class UserService : IUserService
             }
         }
     }
-    public async Task<bool> UnlockUser(int id)
+    public async Task<bool> UnlockUser(int id, int authId)
     {
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
 
         try
         {
-            return await _userRepository.UnlockUser(id);
+            return await _userRepository.UnlockUser(id, authId);
         }
         catch (MySqlException exception)
         {

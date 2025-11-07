@@ -31,7 +31,7 @@ namespace LautusInformatica.Middlewares
             context.Response.ContentType = "application/json";
 
             int statusCode = StatusCodes.Status500InternalServerError;
-            string errorMessage = "Ocorreu um erro inesperado.";
+            string errorMessage = $"{exception.GetType().Name}: {exception.Message}";
 
             if (exception is AppException appEx)
             {
