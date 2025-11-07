@@ -34,7 +34,7 @@ namespace LautusInformatica.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<AuthResponseDTO>>> RegisterUser([FromBody] RegisterRequestDTO registerUserDto)
         {
-            var authResponse = await _authService.RegisterUser(registerUserDto);
+            var authResponse = await _authService.RegisterUser(registerUserDto, 1);
             var apiResponse = new ApiResponse<AuthResponseDTO>
             {
                 Message = "Registro realizado com sucesso",
