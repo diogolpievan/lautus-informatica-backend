@@ -42,7 +42,7 @@ namespace LautusInformatica.Migrations
 
                                 SET @key = 'G7v$9kLm#4rPz2Q!';
 
-                                SET v_DecryptedPass = CAST(AES_DECRYPT(v_StoredPass, @key) AS CHAR);
+                                SET v_DecryptedPass = TO_BASE64(AES_DECRYPT(v_StoredPass, @key));
 
                                
                                  IF v_DecryptPass = p_Password THEN
@@ -78,6 +78,8 @@ namespace LautusInformatica.Migrations
                                     OUT p_Success BOOLEAN       
                                 )
                                 BEGIN
+                                    DECLARE v_LogId INT;
+
                                     SET p_Success = FALSE; 
                                     IF EXISTS (SELECT 1 FROM Users WHERE Id = p_UserId and IsLocked = TRUE) THEN
                                         UPDATE Users
@@ -90,13 +92,13 @@ namespace LautusInformatica.Migrations
                                         SET MESSAGE_TEXT = 'Usuário não encontrado';
                                     END IF;
 
-                                    INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('User: ', p_Username, ' desbloqueado'),
-	                            	        NOW()	                      
-	                                    );
+                                    CALL sp_CreateLog(
+                                        p_AuthId,
+                                        'Users',
+                                        1,
+                                        CONCAT('Usuário desbloqueado - ID: ', p_UserId),
+                                        v_LogId
+                                    );
                                 END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_TrocarSenha(
@@ -108,7 +110,7 @@ namespace LautusInformatica.Migrations
                                     BEGIN
                                         DECLARE v_UserId INT;
                                         DECLARE v_Locked BOOLEAN;
-
+                                        DECLARE v_LogId INT;
                                         SELECT Id
                                         INTO v_UserId
                                         FROM Users
@@ -127,13 +129,12 @@ namespace LautusInformatica.Migrations
                                         SET Password = AES_ENCRYPT(p_NewPassword, @key)        
                                         WHERE Id = p_UserId;
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('Senha do User: ', p_Username, ' alterada'),
-	                            	        NOW()	                      
-	                                    );
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            1,
+                                            CONCAT('Senha alterada - User ID: ', p_UserId),
+                                            v_LogId);
 
                                         CALL sp_DesbloquearUsuario(p_UserId, @success);
 
@@ -147,6 +148,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_UserId INT;
+                                        DECLARE v_LogId INT;
 
                                         SELECT Id
                                         INTO v_UserId
@@ -165,13 +167,13 @@ namespace LautusInformatica.Migrations
                                             DeletedAt = NOW()
                                         WHERE Id = p_UserId;
                                         
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        2,
-	                            	        CONCAT('User: ', p_Username, ' deletado'),
-	                            	        NOW()	                      
-	                                    );
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            2,
+                                            CONCAT('Usuário excluído - ID: ', p_UserId),
+                                            v_LogId
+                                        );
 
 
                                         SET p_Success = TRUE;
@@ -189,6 +191,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_Exists INT DEFAULT 0;
+                                        DECLARE v_LogId INT;
 
                                         SELECT COUNT(*) INTO v_Exists
                                         FROM Users
@@ -207,19 +210,21 @@ namespace LautusInformatica.Migrations
                                             CreatedAt, IsDeleted, IsLocked, AccessFailedCount
                                         )
                                         VALUES (
-                                            p_Username, AES_ENCRYPT(p_Password, @key), p_Phone, p_Email, p_Role, p_Address,
+                                            p_Username, TO_BASE64(AES_ENCRYPT(p_Password, @key)), p_Phone, p_Email, p_Role, p_Address,
                                             NOW(), FALSE, FALSE, 0
                                         );
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        0,
-	                            	        CONCAT('User: ', p_Username, ' criado'),
-	                            	        NOW()	                      
-	                                    );
-
                                         SET p_UserId = LAST_INSERT_ID();
+
+                                        SET @desc = CONCAT('Usuário criado - ID: ', p_UserId, ' - Nome: ', p_Username);
+                                        CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            0,
+                                            @desc,
+                                            v_LogId
+                                        );
+
                                     END");
 
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_UpdateUser(
@@ -233,6 +238,7 @@ namespace LautusInformatica.Migrations
                                     )
                                     BEGIN
                                         DECLARE v_IsLocked BOOLEAN DEFAULT FALSE;
+                                        DECLARE v_LogId INT;
                                         SET p_Success = FALSE;
 
                                         IF NOT EXISTS (SELECT 1 FROM Users WHERE Id = p_Id AND IsDeleted = FALSE) THEN
@@ -256,13 +262,13 @@ namespace LautusInformatica.Migrations
                                             Address = p_Address
                                         WHERE Id = p_Id;
 
-                                        INSERT INTO logs (UserId, TableName, OperationType, Description, OperationDate) VALUES (
-	                            	        p_AuthId,
-	                            	        'Users',
-	                            	        1,
-	                            	        CONCAT('User: ', p_Username, ' atualizado'),
-	                            	        NOW()	                      
-	                                    );
+                                       CALL sp_CreateLog(
+                                            p_AuthId,
+                                            'Users',
+                                            1,
+                                            CONCAT('Usuário atualizado - ID: ', p_Id, ' - Nome: ', p_Username),
+                                            v_LogId
+                                        );
                                         SET p_Success = TRUE;
                                     END");
 

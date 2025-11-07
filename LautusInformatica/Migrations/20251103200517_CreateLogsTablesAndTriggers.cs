@@ -47,6 +47,32 @@ namespace LautusInformatica.Migrations
                 name: "IX_Logs_UserId",
                 table: "Logs",
                 column: "UserId");
+
+            migrationBuilder.Sql(@"CREATE PROCEDURE sp_CreateLog(
+                                    IN p_UserId INT,
+                                    IN p_TableName VARCHAR(50),
+                                    IN p_OperationType INT,
+                                    IN p_Description TEXT,
+                                    OUT p_LogId INT
+                                )
+                                BEGIN
+                                    INSERT INTO logs (
+                                        UserId, 
+                                        TableName, 
+                                        OperationType, 
+                                        Description, 
+                                        OperationDate
+                                    )
+                                    VALUES (
+                                        p_UserId,
+                                        p_TableName,
+                                        p_OperationType,
+                                        p_Description,
+                                        NOW()
+                                    );
+
+                                    SET p_LogId = LAST_INSERT_ID();
+                                END");
         }
 
         /// <inheritdoc />
@@ -59,6 +85,8 @@ namespace LautusInformatica.Migrations
                 name: "IsLocked",
                 table: "Users",
                 newName: "Lockout");
+
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS sp_CreateLog;");
         }
     }
 }

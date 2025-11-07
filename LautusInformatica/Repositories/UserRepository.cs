@@ -15,16 +15,16 @@ namespace LautusInformatica.Repositories
         {
             _context = context;
         }
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            return user;
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
-        public async Task<User> GetUserByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
-            var user = await _context.Users.FindAsync(email);
-            return user;
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
         }
 
         public async Task<IEnumerable<User>> GetAllUsers()
@@ -33,7 +33,7 @@ namespace LautusInformatica.Repositories
             return allUsers.SelectMany(allUsers => new List<User> { allUsers }).Where(user => user.IsDeleted.Equals(false));
         }
 
-        public async Task<int> CreateUser(User user)
+        public async Task<int> CreateUser(User user, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Username", user.Username);
@@ -42,6 +42,7 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Email", user.Email);
             parameters.Add("@p_Role", user.Role);
             parameters.Add("@p_Address", user.Address);
+            parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_UserId", dbType: System.Data.DbType.Int32, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
@@ -52,7 +53,7 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> UpdateUser(User user)
+        public async Task<bool> UpdateUser(User user, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", user.Id);
@@ -61,6 +62,7 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Email", user.Email);
             parameters.Add("@p_Role", user.Role);
             parameters.Add("@p_Address", user.Address);
+            parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
@@ -71,10 +73,11 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> DeleteUser(int id)
+        public async Task<bool> DeleteUser(int id, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
+            parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
@@ -85,11 +88,12 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> ChangePassword(int id, string newPassword)
+        public async Task<bool> ChangePassword(int id, string newPassword, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
             parameters.Add("@p_NewPassword", newPassword);
+            parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
@@ -100,10 +104,11 @@ namespace LautusInformatica.Repositories
             }
         }
 
-        public async Task<bool> UnlockUser(int id)
+        public async Task<bool> UnlockUser(int id, int authId)
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
+            parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
