@@ -7,15 +7,24 @@ namespace LautusInformatica.Models
         public int Id { get; set; }
         public string Equipment { get; set; }
         public string Problem { get; set; }
+        public string? Description { get; set; }
         public DateOnly EntryDate { get; set; }
         public DateOnly? CompletionDate { get; set; }
         public Status Status { get; set; } = Status.Pending;
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedDate { get; set; }
-
+        public decimal ServicePrice { get; set; } = 0;
         public int UserId { get; set; }
         public User User { get; set; }
-
         public ICollection<UsedItems> UsedItems { get; set; } = new List<UsedItems>();
+
+        public decimal TotalPrice
+        {
+            get
+            {
+                decimal usedItemsTotal = UsedItems?.Sum(ui => ui.Quantity * ui.Item.UnitPrice) ?? 0;
+                return ServicePrice + usedItemsTotal;
+            }
+        }
     }
 }
