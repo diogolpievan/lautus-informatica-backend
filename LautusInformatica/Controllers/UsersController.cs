@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LautusInformatica.Interfaces.Services;
 
 namespace LautusInformatica.Controllers
 {
@@ -16,9 +17,9 @@ namespace LautusInformatica.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public UsersController(ILogger<UsersController> logger, UserService userService)
+        public UsersController(ILogger<UsersController> logger, IUserService userService)
         {
             _logger = logger;
             _userService = userService;
