@@ -12,7 +12,10 @@ namespace LautusInformatica.Migrations
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_CreateServiceOrder(
                                     IN p_Equipment VARCHAR(100),
                                     IN p_Problem TEXT,
+                                    IN p_Description TEXT,
                                     IN p_EntryDate DATE,
+                                    IN p_CompletionDate DATE,
+                                    IN p_ServicePrice DECIMAL(10,2),
                                     IN p_UserId INT,
                                     IN p_AuthId INT,
                                     OUT p_ServiceOrderId INT
@@ -20,6 +23,18 @@ namespace LautusInformatica.Migrations
                                 BEGIN
                                     DECLARE v_UserExists INT DEFAULT 0;
                                     DECLARE v_LogId INT;
+
+                                    -- Verifica se a data de entrada é maior que a data atual
+                                    IF p_EntryDate > CURDATE() THEN
+                                        SIGNAL SQLSTATE '45005'
+                                            SET MESSAGE_TEXT = 'A data de entrada não pode ser maior que a data atual';
+                                    END IF;
+
+                                    -- Verifica se data de conclusão é anterior à data de entrada
+                                    IF p_CompletionDate IS NOT NULL AND p_CompletionDate < p_EntryDate THEN
+                                        SIGNAL SQLSTATE '45004'
+                                            SET MESSAGE_TEXT = 'A data de conclusão não pode ser anterior à data de entrada';
+                                    END IF;
 
                                     SELECT COUNT(*) INTO v_UserExists
                                     FROM Users
@@ -31,12 +46,12 @@ namespace LautusInformatica.Migrations
                                     END IF;
 
                                     INSERT INTO ServiceOrders (
-                                        Equipment, Problem, EntryDate, Status,
-                                        UserId, IsDeleted, DeletedDate, CompletionDate
+                                        Equipment, Problem, Description, EntryDate, CompletionDate, Status,
+                                        UserId, IsDeleted, DeletedDate, ServicePrice
                                     )
                                     VALUES (
-                                        p_Equipment, p_Problem, p_EntryDate, 1, 
-                                        p_UserId, FALSE, NULL, NULL
+                                        p_Equipment, p_Problem, p_Description, p_EntryDate, p_CompletionDate, 1, 
+                                        p_UserId, FALSE, NULL, p_ServicePrice
                                     );
 
                                     SET p_ServiceOrderId = LAST_INSERT_ID();
@@ -55,7 +70,10 @@ namespace LautusInformatica.Migrations
                                     IN p_Id INT,
                                     IN p_Equipment VARCHAR(100),
                                     IN p_Problem TEXT,
+                                    IN p_Description TEXT,
                                     IN p_EntryDate DATE,
+                                    IN p_CompletionDate DATE,
+                                    IN p_ServicePrice DECIMAL(10,2),
                                     IN p_UserId INT,
                                     IN p_AuthId INT,
                                     OUT p_Success BOOLEAN
@@ -65,11 +83,13 @@ namespace LautusInformatica.Migrations
                                     DECLARE v_LogId INT;
                                     SET p_Success = FALSE;
 
+                                    -- Verifica se a ordem existe
                                     IF NOT EXISTS (SELECT 1 FROM ServiceOrders WHERE Id = p_Id AND IsDeleted = FALSE) THEN
-                                        SIGNAL SQLSTATE '45000' 
+                                        SIGNAL SQLSTATE '45001' 
                                             SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
                                     END IF;
 
+                                    -- Verifica se o usuário é válido
                                     SELECT COUNT(*) INTO v_UserExists
                                     FROM Users
                                     WHERE Id = p_UserId AND IsDeleted = FALSE;
@@ -79,10 +99,25 @@ namespace LautusInformatica.Migrations
                                             SET MESSAGE_TEXT = 'Usuário não encontrado';
                                     END IF;
 
+                                    -- Verifica se a data de entrada é maior que a data atual
+                                    IF p_EntryDate > CURDATE() THEN
+                                        SIGNAL SQLSTATE '45005'
+                                            SET MESSAGE_TEXT = 'A data de entrada não pode ser maior que a data atual';
+                                    END IF;
+
+                                    -- Verifica se data de conclusão é anterior à data de entrada
+                                    IF p_CompletionDate IS NOT NULL AND p_CompletionDate < p_EntryDate THEN
+                                        SIGNAL SQLSTATE '45004'
+                                            SET MESSAGE_TEXT = 'A data de conclusão não pode ser anterior à data de entrada';
+                                    END IF;
+
                                     UPDATE ServiceOrders
                                     SET Equipment = p_Equipment,
                                         Problem = p_Problem,
+                                        Description = p_Description,
                                         EntryDate = p_EntryDate,
+                                        CompletionDate = p_CompletionDate,
+                                        ServicePrice = p_ServicePrice,
                                         UserId = p_UserId
                                     WHERE Id = p_Id;
 
@@ -97,7 +132,7 @@ namespace LautusInformatica.Migrations
                                     SET p_Success = TRUE;
                                 END");
 
-            // Procedure para excluir ordem de serviço (soft delete)
+            // As demais procedures permanecem idênticas
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DeleteServiceOrder(
                                     IN p_Id INT,
                                     IN p_AuthId INT,
@@ -109,7 +144,7 @@ namespace LautusInformatica.Migrations
 
                                     IF NOT EXISTS (SELECT 1 FROM ServiceOrders WHERE Id = p_Id AND IsDeleted = FALSE) THEN
                                         SET p_Success = FALSE;
-                                        SIGNAL SQLSTATE '45000'
+                                        SIGNAL SQLSTATE '45001'
                                             SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
                                     END IF;
 
@@ -138,7 +173,6 @@ namespace LautusInformatica.Migrations
                                     SET p_Success = TRUE;
                                 END");
 
-            // Procedure para alterar status da ordem de serviço
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_ChangeServiceOrderStatus(
                                     IN p_Id INT,
                                     IN p_Status INT,
@@ -156,14 +190,9 @@ namespace LautusInformatica.Migrations
                                     WHERE Id = p_Id AND IsDeleted = FALSE;
 
                                     IF v_CurrentStatus IS NULL THEN
-                                        SIGNAL SQLSTATE '45000'
-                                            SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
-                                    END IF;
-
-                                    IF v_CurrentStatus IN (5, 6) THEN
                                         SIGNAL SQLSTATE '45001'
-                                            SET MESSAGE_TEXT = 'Não é possível alterar o status de uma ordem cancelada ou arquivada';
-                                    END IF;
+                                            SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
+                                    END IF;;
 
                                     IF p_Status = 4 THEN 
                                         UPDATE ServiceOrders
@@ -189,7 +218,6 @@ namespace LautusInformatica.Migrations
                                     SET p_Success = TRUE;
                                 END");
 
-            // Procedure para completar ordem de serviço
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_CompleteServiceOrder(
                                     IN p_Id INT,
                                     IN p_CompletionDate DATE,
@@ -207,13 +235,8 @@ namespace LautusInformatica.Migrations
                                     WHERE Id = p_Id AND IsDeleted = FALSE;
 
                                     IF v_CurrentStatus IS NULL THEN
-                                        SIGNAL SQLSTATE '45000'
-                                            SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
-                                    END IF;
-
-                                    IF v_CurrentStatus IN (5, 6) THEN
                                         SIGNAL SQLSTATE '45001'
-                                            SET MESSAGE_TEXT = 'Não é possível completar uma ordem cancelada ou arquivada';
+                                            SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
                                     END IF;
 
                                     UPDATE ServiceOrders
