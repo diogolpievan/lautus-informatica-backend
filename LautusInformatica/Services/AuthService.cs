@@ -108,7 +108,8 @@ namespace LautusInformatica.Services
                 new Claim(JwtRegisteredClaimNames.Sub, userResponseDto.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, userResponseDto.Email),
                 new Claim(ClaimTypes.Role, userResponseDto.Role.ToString()),
-                new Claim("username", userResponseDto.Username)
+                new Claim("username", userResponseDto.Username),
+                new Claim("role", ((int)userResponseDto.Role).ToString())  
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings["Key"]));
