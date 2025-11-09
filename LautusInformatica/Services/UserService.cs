@@ -8,6 +8,7 @@ using MySqlConnector;
 using LautusInformatica.DTOs.Auth;
 using LautusInformatica.Exceptions.AlreadyExists;
 using System.Linq;
+using LautusInformatica.Exceptions.BadRequest;
 
 namespace LautusInformatica.Services;
 public class UserService : IUserService

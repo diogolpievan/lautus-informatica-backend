@@ -6,6 +6,7 @@
         InProgress = 2,     
         WaitingParts = 3,   
         Completed = 4,     
-        Cancelled = 5,     
+        Cancelled = 5,
+        Archived = 6
     }
 }

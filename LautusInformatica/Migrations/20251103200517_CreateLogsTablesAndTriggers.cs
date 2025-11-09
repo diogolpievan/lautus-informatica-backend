@@ -56,7 +56,7 @@ namespace LautusInformatica.Migrations
                                     OUT p_LogId INT
                                 )
                                 BEGIN
-                                    INSERT INTO logs (
+                                    INSERT INTO Logs (
                                         UserId, 
                                         TableName, 
                                         OperationType, 

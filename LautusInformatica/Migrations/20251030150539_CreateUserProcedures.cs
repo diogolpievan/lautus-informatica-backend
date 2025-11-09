@@ -19,8 +19,7 @@ namespace LautusInformatica.Migrations
                                 DECLARE v_UserId INT;
                                 DECLARE v_IsLocked BOOLEAN;
                                 DECLARE v_FailedCount INT;
-                                DECLARE v_StoredPass VARBINARY(255);
-                                DECLARE v_DecryptedPass VARCHAR(255);
+                                DECLARE v_StoredPass VARCHAR(255);
 
                                 SET p_Success = FALSE;
 
@@ -42,10 +41,8 @@ namespace LautusInformatica.Migrations
 
                                 SET @key = 'G7v$9kLm#4rPz2Q!';
 
-                                SET v_DecryptedPass = TO_BASE64(AES_DECRYPT(v_StoredPass, @key));
-
                                
-                                 IF v_DecryptPass = p_Password THEN
+                                 IF v_StoredPass = TO_BASE64(AES_ENCRYPT(p_Password, @key)) THEN
                                     SET p_Success = TRUE;
 
                                     UPDATE Users

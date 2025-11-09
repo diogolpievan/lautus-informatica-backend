@@ -1,4 +1,4 @@
-﻿namespace LautusInformatica.Exceptions
+﻿namespace LautusInformatica.Exceptions.BadRequest
 {
     public class BadRequestException : AppException
     {
