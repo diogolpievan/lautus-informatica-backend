@@ -95,6 +95,35 @@ namespace LautusInformatica.Services
                 UserId = so.UserId
             });
         }
+        public async Task<IEnumerable<ServiceOrderResponseDTO>?> GetServiceOrdersByFilters(int? clientId = null, string? status = null)
+        {
+            Status? statusEnum = null;
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (!Enum.TryParse<Status>(status, true, out Status parsedStatus))
+                {
+                    throw new InvalidStatusException(status);
+                }
+                statusEnum = parsedStatus;
+            }
+
+            var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByFilters(clientId, statusEnum);
+            if (serviceOrders == null || !serviceOrders.Any()) return null;
+
+            return serviceOrders.Select(so => new ServiceOrderResponseDTO
+            {
+                Id = so.Id,
+                Equipment = so.Equipment,
+                Problem = so.Problem,
+                Description = so.Description,
+                ServicePrice = so.ServicePrice,
+                EntryDate = so.EntryDate,
+                CompletionDate = so.CompletionDate,
+                Status = so.Status.ToString(),
+                UserId = so.UserId
+            });
+        }
 
         public async Task<ServiceOrderResponseDTO> CreateServiceOrder(ServiceOrderRequestDTO serviceOrderDto, int authId)
         {

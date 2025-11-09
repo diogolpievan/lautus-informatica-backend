@@ -129,5 +129,17 @@ namespace LautusInformatica.Repositories
                 return parameters.Get<bool>("@p_Success");
             }
         }
+        public async Task<IEnumerable<ServiceOrder>?> GetServiceOrdersByFilters(int? clientId = null, Status? status = null)
+        {
+            var query = _context.ServiceOrders.Where(s => !s.IsDeleted);
+
+            if (clientId.HasValue)
+                query = query.Where(s => s.UserId == clientId.Value);
+
+            if (status.HasValue)
+                query = query.Where(s => s.Status == status.Value);
+
+            return await query.ToListAsync();
+        }
     }
 }
