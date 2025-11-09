@@ -6,6 +6,7 @@ namespace LautusInformatica.Migrations
 {
     public partial class CreateServiceOrderProcedures : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Procedure para criar ordem de serviço
