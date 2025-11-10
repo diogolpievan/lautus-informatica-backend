@@ -1,4 +1,5 @@
 ﻿using LautusInformatica.DTOs.ServiceOrder;
+using LautusInformatica.DTOs.UsedItem;
 using LautusInformatica.Interfaces.Repositories;
 using LautusInformatica.Interfaces.Services;
 using LautusInformatica.Models.Enums;
@@ -13,88 +14,112 @@ namespace LautusInformatica.Services
     public class ServiceOrderService : IServiceOrderService
     {
         private readonly IServiceOrderRepository _serviceOrderRepository;
+        private readonly IUsedItemsService _usedItemsService;
 
-        public ServiceOrderService(IServiceOrderRepository serviceOrderRepository)
+        public ServiceOrderService(
+            IServiceOrderRepository serviceOrderRepository,
+            IUsedItemsService usedItemsService)
         {
             _serviceOrderRepository = serviceOrderRepository;
+            _usedItemsService = usedItemsService;
         }
+
+        // ========== LISTAGENS (SEM USEDITEMS COMPLETOS) ==========
 
         public async Task<IEnumerable<ServiceOrderResponseDTO>?> GetAllServiceOrders()
         {
             var serviceOrders = await _serviceOrderRepository.GetAllServiceOrders();
             if (serviceOrders == null || !serviceOrders.Any()) return null;
 
-            return serviceOrders.Select(so => new ServiceOrderResponseDTO
+            var result = new List<ServiceOrderResponseDTO>();
+
+            foreach (var serviceOrder in serviceOrders)
             {
-                Id = so.Id,
-                Equipment = so.Equipment,
-                Problem = so.Problem,
-                Description = so.Description,
-                ServicePrice = so.ServicePrice,
-                EntryDate = so.EntryDate,
-                CompletionDate = so.CompletionDate,
-                Status = so.Status.ToString(),
-                UserId = so.UserId
-            });
+                // Busca apenas a contagem, não os itens completos
+                var usedItemsCount = await _usedItemsService.GetUsedItemsCountByServiceOrder(serviceOrder.Id);
+                var totalCost = await CalculateTotalCost(serviceOrder);
+
+                result.Add(new ServiceOrderResponseDTO
+                {
+                    Id = serviceOrder.Id,
+                    Equipment = serviceOrder.Equipment,
+                    Problem = serviceOrder.Problem,
+                    Description = serviceOrder.Description,
+                    ServicePrice = serviceOrder.ServicePrice,
+                    EntryDate = serviceOrder.EntryDate,
+                    CompletionDate = serviceOrder.CompletionDate,
+                    Status = serviceOrder.Status.ToString(),
+                    UserId = serviceOrder.UserId,
+                    UsedItemsCount = usedItemsCount,
+                    TotalCost = totalCost
+                });
+            }
+
+            return result;
         }
 
-        public async Task<ServiceOrderResponseDTO> GetServiceOrderById(int id)
-        {
-            var serviceOrder = await _serviceOrderRepository.GetServiceOrderById(id);
-            if (serviceOrder == null) throw new ServiceOrderNotFoundException();
-
-            return new ServiceOrderResponseDTO
-            {
-                Id = serviceOrder.Id,
-                Equipment = serviceOrder.Equipment,
-                Problem = serviceOrder.Problem,
-                Description = serviceOrder.Description,
-                ServicePrice = serviceOrder.ServicePrice,
-                EntryDate = serviceOrder.EntryDate,
-                CompletionDate = serviceOrder.CompletionDate,
-                Status = serviceOrder.Status.ToString(),
-                UserId = serviceOrder.UserId
-            };
-        }
-       
         public async Task<IEnumerable<ServiceOrderResponseDTO>?> GetServiceOrdersByClientId(int clientId)
         {
             var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByClientId(clientId);
             if (serviceOrders == null || !serviceOrders.Any()) return null;
 
-            return serviceOrders.Select(so => new ServiceOrderResponseDTO
-            {
-                Id = so.Id,
-                Equipment = so.Equipment,
-                Problem = so.Problem,
-                Description = so.Description,
-                ServicePrice = so.ServicePrice,
-                EntryDate = so.EntryDate,
-                CompletionDate = so.CompletionDate,
-                Status = so.Status.ToString(),
-                UserId = so.UserId
-            });
-        }
+            var result = new List<ServiceOrderResponseDTO>();
 
+            foreach (var serviceOrder in serviceOrders)
+            {
+                var usedItemsCount = await _usedItemsService.GetUsedItemsCountByServiceOrder(serviceOrder.Id);
+                var totalCost = await CalculateTotalCost(serviceOrder);
+
+                result.Add(new ServiceOrderResponseDTO
+                {
+                    Id = serviceOrder.Id,
+                    Equipment = serviceOrder.Equipment,
+                    Problem = serviceOrder.Problem,
+                    Description = serviceOrder.Description,
+                    ServicePrice = serviceOrder.ServicePrice,
+                    EntryDate = serviceOrder.EntryDate,
+                    CompletionDate = serviceOrder.CompletionDate,
+                    Status = serviceOrder.Status.ToString(),
+                    UserId = serviceOrder.UserId,
+                    UsedItemsCount = usedItemsCount,
+                    TotalCost = totalCost
+                });
+            }
+
+            return result;
+        }
 
         public async Task<IEnumerable<ServiceOrderResponseDTO>?> GetServiceOrdersByStatus(Status status)
         {
             var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByStatus(status);
             if (serviceOrders == null || !serviceOrders.Any()) return null;
 
-            return serviceOrders.Select(so => new ServiceOrderResponseDTO
+            var result = new List<ServiceOrderResponseDTO>();
+
+            foreach (var serviceOrder in serviceOrders)
             {
-                Id = so.Id,
-                Equipment = so.Equipment,
-                Problem = so.Problem,
-                Description = so.Description,
-                ServicePrice = so.ServicePrice,
-                EntryDate = so.EntryDate,
-                CompletionDate = so.CompletionDate,
-                Status = so.Status.ToString(),
-                UserId = so.UserId
-            });
+                var usedItemsCount = await _usedItemsService.GetUsedItemsCountByServiceOrder(serviceOrder.Id);
+                var totalCost = await CalculateTotalCost(serviceOrder);
+
+                result.Add(new ServiceOrderResponseDTO
+                {
+                    Id = serviceOrder.Id,
+                    Equipment = serviceOrder.Equipment,
+                    Problem = serviceOrder.Problem,
+                    Description = serviceOrder.Description,
+                    ServicePrice = serviceOrder.ServicePrice,
+                    EntryDate = serviceOrder.EntryDate,
+                    CompletionDate = serviceOrder.CompletionDate,
+                    Status = serviceOrder.Status.ToString(),
+                    UserId = serviceOrder.UserId,
+                    UsedItemsCount = usedItemsCount,
+                    TotalCost = totalCost
+                });
+            }
+
+            return result;
         }
+
         public async Task<IEnumerable<ServiceOrderResponseDTO>?> GetServiceOrdersByFilters(int? clientId = null, string? status = null)
         {
             Status? statusEnum = null;
@@ -111,18 +136,57 @@ namespace LautusInformatica.Services
             var serviceOrders = await _serviceOrderRepository.GetServiceOrdersByFilters(clientId, statusEnum);
             if (serviceOrders == null || !serviceOrders.Any()) return null;
 
-            return serviceOrders.Select(so => new ServiceOrderResponseDTO
+            var result = new List<ServiceOrderResponseDTO>();
+
+            foreach (var serviceOrder in serviceOrders)
             {
-                Id = so.Id,
-                Equipment = so.Equipment,
-                Problem = so.Problem,
-                Description = so.Description,
-                ServicePrice = so.ServicePrice,
-                EntryDate = so.EntryDate,
-                CompletionDate = so.CompletionDate,
-                Status = so.Status.ToString(),
-                UserId = so.UserId
-            });
+                var usedItemsCount = await _usedItemsService.GetUsedItemsCountByServiceOrder(serviceOrder.Id);
+                var totalCost = await CalculateTotalCost(serviceOrder);
+
+                result.Add(new ServiceOrderResponseDTO
+                {
+                    Id = serviceOrder.Id,
+                    Equipment = serviceOrder.Equipment,
+                    Problem = serviceOrder.Problem,
+                    Description = serviceOrder.Description,
+                    ServicePrice = serviceOrder.ServicePrice,
+                    EntryDate = serviceOrder.EntryDate,
+                    CompletionDate = serviceOrder.CompletionDate,
+                    Status = serviceOrder.Status.ToString(),
+                    UserId = serviceOrder.UserId,
+                    UsedItemsCount = usedItemsCount,
+                    TotalCost = totalCost
+                });
+            }
+
+            return result;
+        }
+
+        // ========== DETALHE COMPLETO (COM USEDITEMS) ==========
+
+        public async Task<ServiceOrderDetailResponseDTO> GetServiceOrderDetailById(int id)
+        {
+            var serviceOrder = await _serviceOrderRepository.GetServiceOrderById(id);
+            if (serviceOrder == null) throw new ServiceOrderNotFoundException();
+
+            var usedItems = await _usedItemsService.GetUsedItemsByServiceOrder(id);
+            var totalItemsCost = usedItems.Sum(ui => ui.TotalPrice);
+
+            return new ServiceOrderDetailResponseDTO
+            {
+                Id = serviceOrder.Id,
+                Equipment = serviceOrder.Equipment,
+                Problem = serviceOrder.Problem,
+                Description = serviceOrder.Description,
+                ServicePrice = serviceOrder.ServicePrice,
+                EntryDate = serviceOrder.EntryDate,
+                CompletionDate = serviceOrder.CompletionDate,
+                Status = serviceOrder.Status.ToString(),
+                UserId = serviceOrder.UserId,
+                UsedItems = usedItems.ToList(),
+                TotalItemsCost = totalItemsCost,
+                TotalCost = serviceOrder.ServicePrice + totalItemsCost
+            };
         }
 
         public async Task<ServiceOrderResponseDTO> CreateServiceOrder(ServiceOrderRequestDTO serviceOrderDto, int authId)
@@ -141,20 +205,7 @@ namespace LautusInformatica.Services
                 };
 
                 int createdServiceOrderId = await _serviceOrderRepository.CreateServiceOrder(serviceOrder, authId);
-                var createdServiceOrder = await GetServiceOrderById(createdServiceOrderId);
-
-                return new ServiceOrderResponseDTO
-                {
-                    Id = createdServiceOrder.Id,
-                    Equipment = createdServiceOrder.Equipment,
-                    Problem = createdServiceOrder.Problem,
-                    Description = createdServiceOrder.Description,
-                    ServicePrice = createdServiceOrder.ServicePrice,
-                    EntryDate = createdServiceOrder.EntryDate,
-                    CompletionDate = createdServiceOrder.CompletionDate,
-                    Status = createdServiceOrder.Status,
-                    UserId = createdServiceOrder.UserId
-                };
+                return await ConvertToServiceOrderResponseDTO(createdServiceOrderId);
             }
             catch (MySqlException exception)
             {
@@ -183,21 +234,10 @@ namespace LautusInformatica.Services
                     CompletionDate = serviceOrderDto.CompletionDate,
                     UserId = serviceOrderDto.UserId
                 };
-                if(await _serviceOrderRepository.UpdateServiceOrder(serviceOrder, authId))
+
+                if (await _serviceOrderRepository.UpdateServiceOrder(serviceOrder, authId))
                 {
-                    var updatedServiceOrder = await GetServiceOrderById(id);
-                    return new ServiceOrderResponseDTO
-                    {
-                        Id = updatedServiceOrder.Id,
-                        Equipment = updatedServiceOrder.Equipment,
-                        Problem = updatedServiceOrder.Problem,
-                        Description = updatedServiceOrder.Description,
-                        ServicePrice = updatedServiceOrder.ServicePrice,
-                        EntryDate = updatedServiceOrder.EntryDate,
-                        CompletionDate = updatedServiceOrder.CompletionDate,
-                        Status = updatedServiceOrder.Status,
-                        UserId = updatedServiceOrder.UserId
-                    };
+                    return await ConvertToServiceOrderResponseDTO(id);
                 }
                 throw new ServiceOrderNotFoundException();
             }
@@ -225,7 +265,6 @@ namespace LautusInformatica.Services
                 switch (exception.SqlState)
                 {
                     case "45001": throw new ServiceOrderNotFoundException();
-                    case "45003": throw new ServiceOrderHasUsedItemsException();
                     default: throw;
                 }
             }
@@ -235,6 +274,11 @@ namespace LautusInformatica.Services
         {
             try
             {
+                if (!Enum.IsDefined(typeof(Status), statusId))
+                {
+                    throw new InvalidStatusException(statusId.ToString());
+                }
+
                 return await _serviceOrderRepository.ChangeServiceOrderStatus(id, statusId, authId);
             }
             catch (MySqlException exception)
@@ -242,6 +286,7 @@ namespace LautusInformatica.Services
                 switch (exception.SqlState)
                 {
                     case "45001": throw new ServiceOrderNotFoundException();
+                    case "45006": throw new InvalidStatusException(statusId.ToString());
                     default: throw;
                 }
             }
@@ -258,9 +303,41 @@ namespace LautusInformatica.Services
                 switch (exception.SqlState)
                 {
                     case "45001": throw new ServiceOrderNotFoundException();
+                    case "45004": throw new InvalidCompletionDateException();
                     default: throw;
                 }
             }
+        }
+
+        private async Task<decimal> CalculateTotalCost(ServiceOrder serviceOrder)
+        {
+            var usedItems = await _usedItemsService.GetUsedItemsByServiceOrder(serviceOrder.Id);
+            var totalItemsCost = usedItems.Sum(ui => ui.TotalPrice);
+            return serviceOrder.ServicePrice + totalItemsCost;
+        }
+
+        private async Task<ServiceOrderResponseDTO> ConvertToServiceOrderResponseDTO(int serviceOrderId)
+        {
+            var serviceOrder = await _serviceOrderRepository.GetServiceOrderById(serviceOrderId);
+            if (serviceOrder == null) throw new ServiceOrderNotFoundException();
+
+            var usedItemsCount = await _usedItemsService.GetUsedItemsCountByServiceOrder(serviceOrderId);
+            var totalCost = await CalculateTotalCost(serviceOrder);
+
+            return new ServiceOrderResponseDTO
+            {
+                Id = serviceOrder.Id,
+                Equipment = serviceOrder.Equipment,
+                Problem = serviceOrder.Problem,
+                Description = serviceOrder.Description,
+                ServicePrice = serviceOrder.ServicePrice,
+                EntryDate = serviceOrder.EntryDate,
+                CompletionDate = serviceOrder.CompletionDate,
+                Status = serviceOrder.Status.ToString(),
+                UserId = serviceOrder.UserId,
+                UsedItemsCount = usedItemsCount,
+                TotalCost = totalCost
+            };
         }
     }
 }
