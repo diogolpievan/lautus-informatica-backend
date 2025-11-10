@@ -9,7 +9,6 @@ namespace LautusInformatica.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Procedure para criar ordem de serviço
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_CreateServiceOrder(
                                     IN p_Equipment VARCHAR(100),
                                     IN p_Problem TEXT,
@@ -66,7 +65,6 @@ namespace LautusInformatica.Migrations
                                     );
                                 END");
 
-            // Procedure para atualizar ordem de serviço
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_UpdateServiceOrder(
                                     IN p_Id INT,
                                     IN p_Equipment VARCHAR(100),
@@ -133,7 +131,6 @@ namespace LautusInformatica.Migrations
                                     SET p_Success = TRUE;
                                 END");
 
-            // As demais procedures permanecem idênticas
             migrationBuilder.Sql(@"CREATE PROCEDURE sp_DeleteServiceOrder(
                                     IN p_Id INT,
                                     IN p_AuthId INT,
@@ -193,7 +190,7 @@ namespace LautusInformatica.Migrations
                                     IF v_CurrentStatus IS NULL THEN
                                         SIGNAL SQLSTATE '45001'
                                             SET MESSAGE_TEXT = 'Ordem de serviço não encontrada';
-                                    END IF;;
+                                    END IF;
 
                                     IF p_Status = 4 THEN 
                                         UPDATE ServiceOrders

@@ -15,10 +15,6 @@ namespace LautusInformatica.Migrations
                 table: "Users",
                 newName: "Password");
 
-            migrationBuilder.RenameColumn(
-                name: "Lockout",
-                table: "Users",
-                newName: "IsLocked");
         }
 
         /// <inheritdoc />
@@ -29,10 +25,6 @@ namespace LautusInformatica.Migrations
                 table: "Users",
                 newName: "PasswordHash");
 
-            migrationBuilder.RenameColumn(
-                name: "IsLocked",
-                table: "Users",
-                newName: "Lockout");
         }
     }
 }
