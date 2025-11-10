@@ -7,6 +7,7 @@ namespace LautusInformatica.Interfaces.Services
         Task<UsedItemResponseDTO> GetUsedItemById(int id);
         Task<IEnumerable<UsedItemResponseDTO>> GetUsedItemsByServiceOrder(int serviceOrderId);
         Task<IEnumerable<UsedItemResponseDTO>> GetUsedItemsByItem(int itemId);
+        Task<int> GetUsedItemsCountByServiceOrder(int serviceOrderId);
         Task<UsedItemResponseDTO> CreateUsedItem(int serviceOrderId, UsedItemRequestDTO usedItemDto, int authId);
         Task<UsedItemResponseDTO> UpdateUsedItem(int id, int serviceOrderId, UpdateUsedItemRequestDTO usedItemDto, int authId);
         Task<bool> DeleteUsedItem(int id, int serviceOrderId, int authId);

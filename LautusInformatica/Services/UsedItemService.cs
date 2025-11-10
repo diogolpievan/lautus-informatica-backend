@@ -67,6 +67,12 @@ namespace LautusInformatica.Services
             return result;
         }
 
+        public async Task<int> GetUsedItemsCountByServiceOrder(int serviceOrderId)
+        {
+            var usedItems = await _usedItemsRepository.GetUsedItemsByServiceOrder(serviceOrderId);
+            return usedItems.Count();
+        }
+
         public async Task<IEnumerable<UsedItemResponseDTO>> GetUsedItemsByItem(int itemId)
         {
             var usedItems = await _usedItemsRepository.GetUsedItemsByItem(itemId);
