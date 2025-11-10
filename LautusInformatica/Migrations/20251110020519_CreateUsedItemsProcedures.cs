@@ -18,7 +18,7 @@ namespace LautusInformatica.Migrations
                                 BEGIN
                                     DECLARE v_ServiceOrderExists INT DEFAULT 0;
                                     DECLARE v_ItemExists INT DEFAULT 0;
-                                    DECLARE v_AvailableStock INT DEFAULT 0;
+                                    DECLARE v_AvailableStock INT DEFAULT NULL;
                                     DECLARE v_LogId INT;
 
                                     -- Verificar se a ordem de serviço existe
