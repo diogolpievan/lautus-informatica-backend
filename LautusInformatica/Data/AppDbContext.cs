@@ -17,6 +17,7 @@ namespace LautusInformatica.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<ServiceOrder> ServiceOrders { get; set; }
         public DbSet<UsedItems> UsedItems { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
