@@ -50,8 +50,8 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Equipment", serviceOrder.Equipment);
             parameters.Add("@p_Problem", serviceOrder.Problem);
             parameters.Add("@p_Description", serviceOrder.Description);
-            parameters.Add("@p_EntryDate", serviceOrder.EntryDate);
-            parameters.Add("@p_CompletionDate", serviceOrder.CompletionDate);
+            parameters.Add("@p_EntryDate", serviceOrder.EntryDate.ToDateTime(TimeOnly.MinValue));
+            parameters.Add("@p_CompletionDate", serviceOrder.CompletionDate?.ToDateTime(TimeOnly.MinValue));
             parameters.Add("@p_ServicePrice", serviceOrder.ServicePrice);
             parameters.Add("@p_UserId", serviceOrder.UserId);
             parameters.Add("@p_AuthId", authId);
@@ -72,8 +72,8 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Equipment", serviceOrder.Equipment);
             parameters.Add("@p_Problem", serviceOrder.Problem);
             parameters.Add("@p_Description", serviceOrder.Description);
-            parameters.Add("@p_EntryDate", serviceOrder.EntryDate);
-            parameters.Add("@p_CompletionDate", serviceOrder.CompletionDate);
+            parameters.Add("@p_EntryDate", serviceOrder.EntryDate.ToDateTime(TimeOnly.MinValue));
+            parameters.Add("@p_CompletionDate", serviceOrder.CompletionDate?.ToDateTime(TimeOnly.MinValue));
             parameters.Add("@p_ServicePrice", serviceOrder.ServicePrice);
             parameters.Add("@p_UserId", serviceOrder.UserId);
             parameters.Add("@p_AuthId", authId);
@@ -119,7 +119,7 @@ namespace LautusInformatica.Repositories
         {
             var parameters = new DynamicParameters();
             parameters.Add("@p_Id", id);
-            parameters.Add("@p_CompletionDate", completionDate);
+            parameters.Add("@p_CompletionDate", completionDate.ToDateTime(TimeOnly.MinValue));
             parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
