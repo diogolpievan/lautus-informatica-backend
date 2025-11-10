@@ -1,10 +1,12 @@
 using LautusInformatica.Data;
+using LautusInformatica.Exceptions.BadRequest;
 using LautusInformatica.Interfaces.Repositories;
 using LautusInformatica.Interfaces.Services;
 using LautusInformatica.Repositories;
 using LautusInformatica.Routing;
 using LautusInformatica.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,6 +40,32 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var firstError = context.ModelState
+            .Where(kvp => kvp.Value.Errors.Count > 0)
+            .Select(kvp => new
+            {
+                Parameter = kvp.Key.Split('.').Last(),
+                Error = kvp.Value.Errors.First().ErrorMessage
+            })
+            .FirstOrDefault();
+        var error = firstError?.Error;
+        var parameter = firstError?.Parameter;
+
+        var response = new
+        {
+            message = $"{error} for paramter {parameter}",
+            success = false,
+        };
+
+        return new BadRequestObjectResult(response);
+    };
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
