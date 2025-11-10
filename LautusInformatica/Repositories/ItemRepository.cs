@@ -68,11 +68,15 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_UnitPrice", item.UnitPrice);
             parameters.Add("@p_Category", item.Category);
             parameters.Add("@p_AuthId", authId);
+            parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
+
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
-                int rowsAffected = await connection.ExecuteAsync("sp_UpdateItem", parameters, commandType: System.Data.CommandType.StoredProcedure);
-                return rowsAffected > 0;
+                await connection.ExecuteAsync("sp_UpdateItem", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                bool success = parameters.Get<bool>("@p_Success");
+
+                return success;
             }
         }
         public async Task<bool> DeleteItem(int id, int authId)
@@ -85,6 +89,7 @@ namespace LautusInformatica.Repositories
             {
                 await connection.ExecuteAsync("sp_DeleteItem", parameters, commandType: System.Data.CommandType.StoredProcedure);
                 bool success = parameters.Get<bool>("@p_Success");
+
                 return success;
             }
         }

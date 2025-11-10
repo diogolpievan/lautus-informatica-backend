@@ -5,6 +5,7 @@ using LautusInformatica.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LautusInformatica.Controllers
 {
@@ -99,6 +100,7 @@ namespace LautusInformatica.Controllers
         public async Task<ActionResult<ApiResponse<bool>>> DeleteItem(int id)
         {
             var result = await _itemService.DeleteItem(id, UserId);
+
             var apiResponse = new ApiResponse<bool>
             {
                 Message = "Item deletado com sucesso",
