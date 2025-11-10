@@ -107,7 +107,7 @@ namespace LautusInformatica.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userResponseDto.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, userResponseDto.Email),
-                new Claim(ClaimTypes.Role, userResponseDto.Role.ToString()),
+                new Claim(ClaimTypes.Role, userResponseDto.Role == 0 ? "Admin" : "User"),
                 new Claim("username", userResponseDto.Username),
                 new Claim("role", ((int)userResponseDto.Role).ToString())  
             };

@@ -5,6 +5,7 @@ using LautusInformatica.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LautusInformatica.Controllers
 {
@@ -73,20 +74,31 @@ namespace LautusInformatica.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ItemResponseDTO>>> CreateItem([FromBody] ItemRequestDTO itemRequestDTO)
         {
-            var createdItem = await _itemService.CreateItem(itemRequestDTO, int.Parse(User.FindFirst("id")!.Value));
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User ID not found in token");
+            }
+            var createdItem = await _itemService.CreateItem(itemRequestDTO, int.Parse(userIdClaim));
             var apiResponse = new ApiResponse<ItemResponseDTO>
             {
                 Message = "Item criado com sucesso",
                 Success = true,
                 Data = createdItem
             };
-            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.Id });
+            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.Id }, apiResponse);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ItemResponseDTO>>> UpdateItem(int id, [FromBody] ItemRequestDTO itemRequestDTO)
         {
-            var updatedItem = await _itemService.UpdateItem(id, itemRequestDTO, int.Parse(User.FindFirst("id")!.Value));
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User ID not found in token");
+            }
+
+            var updatedItem = await _itemService.UpdateItem(id, itemRequestDTO, int.Parse(userIdClaim));
             var apiResponse = new ApiResponse<ItemResponseDTO>
             {
                 Message = "Item atualizado com sucesso",
@@ -98,7 +110,13 @@ namespace LautusInformatica.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteItem(int id)
         {
-            var result = await _itemService.DeleteItem(id, int.Parse(User.FindFirst("id")!.Value));
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User ID not found in token");
+            }
+
+            var result = await _itemService.DeleteItem(id, int.Parse(userIdClaim));
             var apiResponse = new ApiResponse<bool>
             {
                 Message = "Item deletado com sucesso",
