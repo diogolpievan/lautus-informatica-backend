@@ -59,7 +59,7 @@ namespace LautusInformatica.Controllers
         {
             var createdServiceOrder = await _serviceOrderService.CreateServiceOrder(
                 serviceOrderRequestDTO,
-                int.Parse(User.FindFirst("id")!.Value)
+                1
             );
 
             var apiResponse = new ApiResponse<ServiceOrderResponseDTO>
@@ -80,7 +80,7 @@ namespace LautusInformatica.Controllers
             var updatedServiceOrder = await _serviceOrderService.UpdateServiceOrder(
                 id,
                 serviceOrderRequestDTO,
-                int.Parse(User.FindFirst("id")!.Value)
+                1
             );
 
             var apiResponse = new ApiResponse<ServiceOrderResponseDTO>
@@ -98,7 +98,7 @@ namespace LautusInformatica.Controllers
         {
             var result = await _serviceOrderService.DeleteServiceOrder(
                 id,
-                int.Parse(User.FindFirst("id")!.Value)
+                1
             );
 
             var apiResponse = new ApiResponse<bool>
@@ -119,7 +119,7 @@ namespace LautusInformatica.Controllers
             var result = await _serviceOrderService.ChangeServiceOrderStatus(
                 id,
                 (int)request.Status,
-                int.Parse(User.FindFirst("id")!.Value)
+                1
             );
 
             var apiResponse = new ApiResponse<bool>
@@ -138,7 +138,7 @@ namespace LautusInformatica.Controllers
             var result = await _serviceOrderService.ChangeServiceOrderStatus(
                 id,
                 (int)Status.Completed,
-                int.Parse(User.FindFirst("id")!.Value)
+                1
             );
 
             var apiResponse = new ApiResponse<bool>
