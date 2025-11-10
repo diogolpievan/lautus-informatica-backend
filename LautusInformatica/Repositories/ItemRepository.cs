@@ -97,7 +97,7 @@ namespace LautusInformatica.Repositories
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
-                await connection.ExecuteAsync("sp_AdjustItemStock", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                await connection.ExecuteAsync("sp_AdjustStock", parameters, commandType: System.Data.CommandType.StoredProcedure);
                 bool success = parameters.Get<bool>("@p_Success");
                 return success;
             }
