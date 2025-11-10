@@ -11,7 +11,7 @@ namespace LautusInformatica.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "Admin")]
-    public class ItemsController : ControllerBase
+    public class ItemsController : BaseController
     {
         private readonly IItemService _itemService;
         public ItemsController(IItemService itemService)
@@ -73,20 +73,20 @@ namespace LautusInformatica.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ItemResponseDTO>>> CreateItem([FromBody] ItemRequestDTO itemRequestDTO)
         {
-            var createdItem = await _itemService.CreateItem(itemRequestDTO, int.Parse(User.FindFirst("id")!.Value));
+            var createdItem = await _itemService.CreateItem(itemRequestDTO, UserId);
             var apiResponse = new ApiResponse<ItemResponseDTO>
             {
                 Message = "Item criado com sucesso",
                 Success = true,
                 Data = createdItem
             };
-            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.Id });
+            return CreatedAtAction(nameof(GetItemById), new { id = createdItem.Id }, apiResponse);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ItemResponseDTO>>> UpdateItem(int id, [FromBody] ItemRequestDTO itemRequestDTO)
         {
-            var updatedItem = await _itemService.UpdateItem(id, itemRequestDTO, int.Parse(User.FindFirst("id")!.Value));
+            var updatedItem = await _itemService.UpdateItem(id, itemRequestDTO, UserId);
             var apiResponse = new ApiResponse<ItemResponseDTO>
             {
                 Message = "Item atualizado com sucesso",
@@ -98,7 +98,7 @@ namespace LautusInformatica.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteItem(int id)
         {
-            var result = await _itemService.DeleteItem(id, int.Parse(User.FindFirst("id")!.Value));
+            var result = await _itemService.DeleteItem(id, UserId);
             var apiResponse = new ApiResponse<bool>
             {
                 Message = "Item deletado com sucesso",
@@ -114,7 +114,7 @@ namespace LautusInformatica.Controllers
             var result = await _itemService.AdjustStock(
                 id,
                 request.Quantity,
-                int.Parse(User.FindFirst("id")!.Value));
+                UserId);
 
             var apiResponse = new ApiResponse<bool>
             {

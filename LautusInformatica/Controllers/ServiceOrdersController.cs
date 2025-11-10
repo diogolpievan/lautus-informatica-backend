@@ -11,7 +11,7 @@ namespace LautusInformatica.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "Admin")]
-    public class ServiceOrdersController : ControllerBase
+    public class ServiceOrdersController : BaseController
     {
         private readonly IServiceOrderService _serviceOrderService;
 
@@ -25,7 +25,6 @@ namespace LautusInformatica.Controllers
             [FromQuery] int? clientId = null,
             [FromQuery] string? status = null)
         {
-
             var serviceOrders = await _serviceOrderService.GetServiceOrdersByFilters(clientId, status);
 
             var apiResponse = new ApiResponse<IEnumerable<ServiceOrderResponseDTO>>
@@ -38,14 +37,13 @@ namespace LautusInformatica.Controllers
             };
 
             return Ok(apiResponse);
-            
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<ServiceOrderResponseDTO>>> GetServiceOrderById(int id)
+        public async Task<ActionResult<ApiResponse<ServiceOrderDetailResponseDTO>>> GetServiceOrderById(int id)
         {
-            var serviceOrder = await _serviceOrderService.GetServiceOrderById(id);
-            var apiResponse = new ApiResponse<ServiceOrderResponseDTO>
+            var serviceOrder = await _serviceOrderService.GetServiceOrderDetailById(id);
+            var apiResponse = new ApiResponse<ServiceOrderDetailResponseDTO>
             {
                 Message = "Ordem de serviço encontrada com sucesso",
                 Success = true,
@@ -59,7 +57,7 @@ namespace LautusInformatica.Controllers
         {
             var createdServiceOrder = await _serviceOrderService.CreateServiceOrder(
                 serviceOrderRequestDTO,
-                1
+                UserId 
             );
 
             var apiResponse = new ApiResponse<ServiceOrderResponseDTO>
@@ -80,7 +78,7 @@ namespace LautusInformatica.Controllers
             var updatedServiceOrder = await _serviceOrderService.UpdateServiceOrder(
                 id,
                 serviceOrderRequestDTO,
-                1
+                UserId
             );
 
             var apiResponse = new ApiResponse<ServiceOrderResponseDTO>
@@ -98,7 +96,7 @@ namespace LautusInformatica.Controllers
         {
             var result = await _serviceOrderService.DeleteServiceOrder(
                 id,
-                1
+                UserId
             );
 
             var apiResponse = new ApiResponse<bool>
@@ -119,7 +117,7 @@ namespace LautusInformatica.Controllers
             var result = await _serviceOrderService.ChangeServiceOrderStatus(
                 id,
                 (int)request.Status,
-                1
+                UserId
             );
 
             var apiResponse = new ApiResponse<bool>
@@ -138,7 +136,7 @@ namespace LautusInformatica.Controllers
             var result = await _serviceOrderService.ChangeServiceOrderStatus(
                 id,
                 (int)Status.Completed,
-                1
+                UserId
             );
 
             var apiResponse = new ApiResponse<bool>

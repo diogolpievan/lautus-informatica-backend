@@ -14,7 +14,7 @@ namespace LautusInformatica.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseController
     {
         private readonly ILogger<UsersController> _logger;
         private readonly IUserService _userService;
@@ -76,7 +76,7 @@ namespace LautusInformatica.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<UserResponseDTO>>> CreateUser([FromBody] UserRequestDTO userRequestDTO)
         {
-            var user = await _userService.CreateUser(userRequestDTO, 1);
+            var user = await _userService.CreateUser(userRequestDTO, UserId);
 
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
@@ -106,7 +106,7 @@ namespace LautusInformatica.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteUser(int id)
         {
-            var result = await _userService.DeleteUser(id, 1);
+            var result = await _userService.DeleteUser(id, UserId);
             var apiResponse = new ApiResponse<bool>
             {
                 Message = result ? "User deletado com successo" : "User deletion failed",
@@ -120,7 +120,7 @@ namespace LautusInformatica.Controllers
         [HttpPost("{id}/change-password")]
         public async Task<ActionResult<ApiResponse<bool>>> ChangePassword(int id, [FromBody] ChangePasswordDTO changePasswordDTO)
         {
-            var result = await _userService.ChangePassword(id, changePasswordDTO, 1);
+            var result = await _userService.ChangePassword(id, changePasswordDTO, UserId);
             var apiResponse = new ApiResponse<bool>
             {
                 Message = result ? "Senha alterada com sucesso" : "Falha ao alterar a senha",
@@ -134,7 +134,7 @@ namespace LautusInformatica.Controllers
         [HttpPost("{id}/lock")]
         public async Task<ActionResult<ApiResponse<bool>>> UnlockUser(int id)
         {
-            var result = await _userService.UnlockUser(id, 1);
+            var result = await _userService.UnlockUser(id, UserId);
             var apiResponse = new ApiResponse<bool>
             {
                 Message = result ? "User desbloqueado com sucesso" : "Falha ao desbloquear o user",

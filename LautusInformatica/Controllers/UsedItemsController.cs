@@ -11,7 +11,7 @@ namespace LautusInformatica.Controllers
     [ApiController]
     [Route("api/service-orders/{serviceOrderId}/used-items")]
     [Authorize(Roles = "Admin")]
-    public class UsedItemsController : ControllerBase
+    public class UsedItemsController : BaseController
     {
         private readonly IUsedItemsService _usedItemsService;
 
@@ -57,7 +57,7 @@ namespace LautusInformatica.Controllers
             var createdUsedItem = await _usedItemsService.CreateUsedItem(
                 serviceOrderId,
                 usedItemRequestDTO,
-                int.Parse(User.FindFirst("id")!.Value)
+                UserId
             );
 
             var apiResponse = new ApiResponse<UsedItemResponseDTO>
@@ -84,7 +84,7 @@ namespace LautusInformatica.Controllers
                 id,
                 serviceOrderId,
                 updateUsedItemRequestDTO,
-                int.Parse(User.FindFirst("id")!.Value)
+                UserId
             );
 
             var apiResponse = new ApiResponse<UsedItemResponseDTO>
@@ -103,7 +103,7 @@ namespace LautusInformatica.Controllers
             var result = await _usedItemsService.DeleteUsedItem(
                 id,
                 serviceOrderId, 
-                int.Parse(User.FindFirst("id")!.Value)
+                UserId
             );
 
             var apiResponse = new ApiResponse<bool>
