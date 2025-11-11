@@ -132,7 +132,7 @@ namespace LautusInformatica.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost("{id}/lock")]
-        public async Task<ActionResult<ApiResponse<bool>>> UnlockUser(int id)
+        public async Task<ActionResult<ApiResponse<string>>> UnlockUser(int id)
         {
             var result = await _userService.UnlockUser(id, UserId);
             var apiResponse = new ApiResponse<bool>
