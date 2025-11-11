@@ -107,7 +107,7 @@ namespace LautusInformatica.Repositories
         public async Task<bool> UnlockUser(int id, int authId)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@p_Id", id);
+            parameters.Add("@p_UserId", id);
             parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 

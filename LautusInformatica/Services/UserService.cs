@@ -100,6 +100,7 @@ public class UserService : IUserService
         var user = await _userRepository.GetUserById(id);
         if (user == null) throw new UserNotFoundException();
 
+        user.Username = userRequest.Username;
         user.Phone = userRequest.Phone;
         user.Email = userRequest.Email;
         user.Role = userRequest.Role;
