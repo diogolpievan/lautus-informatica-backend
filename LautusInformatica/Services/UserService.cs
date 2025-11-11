@@ -31,7 +31,8 @@ public class UserService : IUserService
             Phone = user.Phone,
             Email = user.Email,
             Role = user.Role,
-            Address = user.Address
+            Address = user.Address,
+            IsLocked = user.IsLocked
         };
     }
 
@@ -46,7 +47,8 @@ public class UserService : IUserService
             Phone = user.Phone,
             Email = user.Email,
             Role = user.Role,
-            Address = user.Address
+            Address = user.Address,
+            IsLocked = user.IsLocked
         };
     }
 
@@ -60,7 +62,8 @@ public class UserService : IUserService
             Phone = user.Phone,
             Email = user.Email,
             Role = user.Role,
-            Address = user.Address
+            Address = user.Address,
+            IsLocked = user.IsLocked
         });
     }
 

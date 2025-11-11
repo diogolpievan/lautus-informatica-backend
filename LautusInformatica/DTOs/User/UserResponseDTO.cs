@@ -10,5 +10,6 @@ namespace LautusInformatica.DTOs.User
         public string Email { get; set; }
         public UserRole Role { get; set; }
         public string Address { get; set; }
+        public bool IsLocked { get; set; }
     }
 }
