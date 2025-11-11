@@ -21,6 +21,7 @@ namespace LautusInformatica.Services
             {
                 Id = log.Id,
                 UserId = log.UserId,
+                OperationType = log.OperationType,
                 TableName = log.TableName,
                 OperationDate = log.OperationDate,
                 Description = log.Description,
