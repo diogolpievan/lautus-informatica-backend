@@ -161,7 +161,7 @@ namespace LautusInformatica.Migrations
 
                                         UPDATE Users
                                         SET IsDeleted = TRUE,
-                                            DeletedAt = NOW()
+                                            DeletedDate = NOW()
                                         WHERE Id = p_UserId;
                                         
                                         CALL sp_CreateLog(
