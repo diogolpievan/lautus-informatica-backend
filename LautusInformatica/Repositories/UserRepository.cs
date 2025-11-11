@@ -76,13 +76,13 @@ namespace LautusInformatica.Repositories
         public async Task<bool> DeleteUser(int id, int authId)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("@p_Id", id);
+            parameters.Add("@p_UserId", id);
             parameters.Add("@p_AuthId", authId);
             parameters.Add("@p_Success", dbType: System.Data.DbType.Boolean, direction: System.Data.ParameterDirection.Output);
 
             using (var connection = new MySqlConnection(_context.Database.GetConnectionString()))
             {
-                await connection.ExecuteAsync("sp_DeleteUser", parameters, commandType: System.Data.CommandType.StoredProcedure);
+                await connection.ExecuteAsync("sp_ExcluirUsuario", parameters, commandType: System.Data.CommandType.StoredProcedure);
                 bool success = parameters.Get<bool>("@p_Success");
                 return success;
             }

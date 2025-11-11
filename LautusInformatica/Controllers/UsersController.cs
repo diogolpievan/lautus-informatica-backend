@@ -85,14 +85,14 @@ namespace LautusInformatica.Controllers
                 Data = user
             };
 
-            return CreatedAtAction(nameof(GetUserById), apiResponse);
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, apiResponse);
         }
 
         [Authorize]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<UserResponseDTO>>> UpdateUser(int id, [FromBody] UserRequestDTO userRequestDTO)
         {
-            var user = await _userService.UpdateUser(id, userRequestDTO, 1);
+            var user = await _userService.UpdateUser(id, userRequestDTO, UserId);
             var apiResponse = new ApiResponse<UserResponseDTO>
             {
                 Message = "User atualizado com sucesso",
