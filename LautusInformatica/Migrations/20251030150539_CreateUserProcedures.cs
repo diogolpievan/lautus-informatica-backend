@@ -230,7 +230,8 @@ namespace LautusInformatica.Migrations
                                         IN p_Phone VARCHAR(20),
                                         IN p_Email VARCHAR(255),
                                         IN p_Role INT,
-                                        IN p_Address VARCHAR(255),
+                                        IN p_Address VARCHAR(255),                                        
+                                        IN p_AuthId VARCHAR(255),
                                         OUT p_Success BOOLEAN     
                                     )
                                     BEGIN
