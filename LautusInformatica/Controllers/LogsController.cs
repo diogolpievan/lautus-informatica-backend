@@ -18,12 +18,12 @@ namespace LautusInformatica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class LogController : BaseController
+    public class LogsController : BaseController
     {
-        private readonly ILogger<LogController> _logger;
+        private readonly ILogger<LogsController> _logger;
         private readonly ILogService _logService;
 
-        public LogController(ILogger<LogController> logger, ILogService logService)
+        public LogsController(ILogger<LogsController> logger, ILogService logService)
         {
             _logger = logger;
             _logService = logService;
