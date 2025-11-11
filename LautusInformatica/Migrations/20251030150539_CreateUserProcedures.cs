@@ -78,7 +78,7 @@ namespace LautusInformatica.Migrations
                                     DECLARE v_LogId INT;
 
                                     SET p_Success = FALSE; 
-                                    IF EXISTS (SELECT 1 FROM Users WHERE Id = p_UserId and IsLocked = TRUE) THEN
+                                    IF EXISTS (SELECT 1 FROM Users WHERE Id = p_UserId) THEN
                                         UPDATE Users
                                         SET IsLocked = FALSE,
                                             AccessFailedCount = 0
@@ -123,7 +123,7 @@ namespace LautusInformatica.Migrations
                                         SET @key = 'G7v$9kLm#4rPz2Q!';
 
                                         UPDATE Users
-                                        SET Password = AES_ENCRYPT(p_NewPassword, @key)        
+                                        SET Password = TO_BASE64(AES_ENCRYPT(p_NewPassword, @key))        
                                         WHERE Id = p_UserId;
 
                                         CALL sp_CreateLog(
@@ -133,7 +133,7 @@ namespace LautusInformatica.Migrations
                                             CONCAT('Senha alterada - User ID: ', p_UserId),
                                             v_LogId);
 
-                                        CALL sp_DesbloquearUsuario(p_UserId, @success);
+                                        CALL sp_DesbloquearUsuario(p_UserId, p_AuthId, @success);
 
                                         SET p_Success = TRUE;
                                     END");
