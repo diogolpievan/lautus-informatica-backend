@@ -1,5 +1,4 @@
 # Lautus Informática - Backend
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/diogolpievan/lautus-informatica-backend)
 
 This repository contains the backend for Lautus Informática, a management system for a computer repair and services business. Developed with .NET 8 and ASP.NET Core, it provides a robust RESTful API to handle operations such as user management, service orders, inventory control, and activity logging. The system is designed to interact with a MySQL database, utilizing both Entity Framework Core for ORM and Dapper for optimized stored procedure execution.
 
